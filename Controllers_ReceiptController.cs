@@ -16,9 +16,8 @@ namespace SE320_Final.Controllers
 
             // TODO: Replace this placeholder logic with actual DB connection and query
             // Example query:
-            // SELECT * FROM receipts WHERE purchaseDate BETWEEN @startDate AND @endDate
+            // SELECT * FROM receipts WHERE purchaseDate BETWEEN @startDate AND endDate
 
-            // Pseudocode:
             /*
             using (var conn = new SqlConnection(_connectionString))
             {
