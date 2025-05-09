@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "dgSpecHash": "FXt5kR3fRwv4mksNJjYsNSG/azQSL0wbbADbJ6IP4Aqu93a88Z31UBha7Y36rHKm8/ZYIhWxvriX76TVmvBGpw==",
+  "success": true,
+  "projectFilePath": "/Users/andreweppich/Desktop/CPSC_Projects/SE320/SE320_Final/receiptProject/receiptProject.csproj",
+  "expectedPackageFiles": [
+    "/Users/andreweppich/.nuget/packages/microsoft.aspnetcore.openapi/8.0.12/microsoft.aspnetcore.openapi.8.0.12.nupkg.sha512",
+    "/Users/andreweppich/.nuget/packages/microsoft.extensions.apidescription.server/6.0.5/microsoft.extensions.apidescription.server.6.0.5.nupkg.sha512",
+    "/Users/andreweppich/.nuget/packages/microsoft.openapi/1.6.14/microsoft.openapi.1.6.14.nupkg.sha512",
+    "/Users/andreweppich/.nuget/packages/swashbuckle.aspnetcore/6.6.2/swashbuckle.aspnetcore.6.6.2.nupkg.sha512",
+    "/Users/andreweppich/.nuget/packages/swashbuckle.aspnetcore.swagger/6.6.2/swashbuckle.aspnetcore.swagger.6.6.2.nupkg.sha512",
+    "/Users/andreweppich/.nuget/packages/swashbuckle.aspnetcore.swaggergen/6.6.2/swashbuckle.aspnetcore.swaggergen.6.6.2.nupkg.sha512",
+    "/Users/andreweppich/.nuget/packages/swashbuckle.aspnetcore.swaggerui/6.6.2/swashbuckle.aspnetcore.swaggerui.6.6.2.nupkg.sha512"
+  ],
+  "logs": []
+}
