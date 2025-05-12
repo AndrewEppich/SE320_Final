@@ -1,36 +1,43 @@
 using System;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
+using receiptProject.Services;
 
-namespace SE320_Final
+namespace receiptProject.Services
 {
-    public class ReceiptDateFilter
+    public class DateBasedReceiptFilter
     {
-        private string _connectionString = "YOUR_CONNECTION_STRING_HERE";
-
         public List<Receipt> GetReceiptsByDateRange(DateTime startDate, DateTime endDate)
         {
             var receiptsByDate = new List<Receipt>();
             
-            using (var conn = new SqlConnection(_connectionString))
+            string connectionString = "Server=localhost;Database=ReceiptProject;User=root;Password=CPSC40801;Port=3306;";
+            
+            using (var conn = new MySqlConnection(connectionString))
             {
                 conn.Open();
-                var dateQuery = new SqlCommand("SELECT * FROM ReceiptProject.receipts JOIN ReceiptProject.user u on receipts.userID = u.userID WHERE purchaseDate BETWEEN @startdate and @enddate ORDER BY purchaseDate", conn);
+                var dateQuery = new MySqlCommand(
+                    "SELECT * FROM receipts JOIN user u ON receipts.userID = u.userID WHERE purchaseDate BETWEEN @startDate AND @endDate ORDER BY purchaseDate", 
+                    conn);
                 dateQuery.Parameters.AddWithValue("@startDate", startDate);
                 dateQuery.Parameters.AddWithValue("@endDate", endDate);
 
-                var Datereader = dateQuery.ExecuteReader();
-                while (Datereader.Read())
+                var dateReader = dateQuery.ExecuteReader();
+                while (dateReader.Read())
                 {
                     receiptsByDate.Add(new Receipt
                     {
-                        ReceiptID = Datereader.GetInt32("receiptID"),
-                        UserID = Datereader.GetInt32("userID"),
-                        Vendor = Datereader.GetString("vendor"),
-                        Amount = Datereader.GetDecimal("amount"),
-                        PurchaseDate = Datereader.GetDateTime("purchaseDate"),
-                        ImagePath = Datereader.IsDBNull(reader.GetOrdinal("imagePath")) ? null : Datereader.GetString("imagePath"),
-                        MetadataJson = Datereader.IsDBNull(reader.GetOrdinal("metadataJson")) ? null : Datereader.GetString("metadataJson")
+                        ReceiptID = dateReader.GetInt32("receiptID"),
+                        UserID = dateReader.GetInt32("userID"),
+                        Vendor = dateReader.GetString("vendor"),
+                        Amount = dateReader.GetDecimal("amount"),
+                        PurchaseDate = dateReader.GetDateTime("purchaseDate"),
+                        ImagePath = dateReader.IsDBNull(dateReader.GetOrdinal("imagePath")) 
+                            ? null 
+                            : dateReader.GetString("imagePath"),
+                        MetadataJson = dateReader.IsDBNull(dateReader.GetOrdinal("metadataJson")) 
+                            ? null 
+                            : dateReader.GetString("metadataJson")
                     });
                 }
             }
