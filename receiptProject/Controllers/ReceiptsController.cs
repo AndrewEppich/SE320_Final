@@ -1,0 +1,133 @@
+using Microsoft.AspNetCore.Mvc;
+using receiptProject.Services;
+
+namespace receiptProject.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ReceiptsController : ControllerBase
+    {
+        private readonly IReceiptRepository _repository;
+        private readonly ILogger<ReceiptsController> _logger;
+
+        public ReceiptsController(IReceiptRepository repository, ILogger<ReceiptsController> logger)
+        {
+            _repository = repository;
+            _logger = logger;
+        }
+
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Receipt>>> GetReceipts()
+        {
+            try
+            {
+
+                int userId = 1;
+                var receipts = await _repository.GetAllReceiptsAsync(userId);
+                return Ok(receipts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting receipts");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Receipt>> GetReceipt(int id)
+        {
+            try
+            {
+
+                int userId = 1;
+                var receipt = await _repository.GetReceiptByIdAsync(id, userId);
+
+                if (receipt == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(receipt);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting receipt {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+
+        [HttpPost]
+        public async Task<ActionResult<Receipt>> PostReceipt(Receipt receipt)
+        {
+            try
+            {
+
+                receipt.UserID = 1;
+                
+                var createdReceipt = await _repository.AddReceiptAsync(receipt);
+                return CreatedAtAction(nameof(GetReceipt), new { id = createdReceipt.ReceiptID }, createdReceipt);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating receipt");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutReceipt(int id, Receipt receipt)
+        {
+            if (id != receipt.ReceiptID)
+            {
+                return BadRequest();
+            }
+
+            try
+            {
+
+                receipt.UserID = 1;
+                
+                bool success = await _repository.UpdateReceiptAsync(receipt);
+                if (!success)
+                {
+                    return NotFound();
+                }
+                
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating receipt {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteReceipt(int id)
+        {
+            try
+            {
+
+                int userId = 1;
+                
+                bool success = await _repository.DeleteReceiptAsync(id, userId);
+                if (!success)
+                {
+                    return NotFound();
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting receipt {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+    }
+} 

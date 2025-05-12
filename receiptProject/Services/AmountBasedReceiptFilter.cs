@@ -1,29 +1,31 @@
 using System;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
+using receiptProject.Services;
 
-namespace SE320_Final
+namespace receiptProject.Services
 {
     public class AmountBasedReceiptFilter
     {
-        public List<Receipt> AmountBasedReceiptFilter(int minAmount, int maxAmount)
+        public List<Receipt> FilterByAmount(int minAmount, int maxAmount)
         {
+            var receiptsByAmount = new List<Receipt>();
 
-            private var receiptsByAmount = new List<Receipts>();
-
-            using (var conn = new SqlConnection()){
-                conn.Open()
+            string connectionString = "Server=localhost;Database=ReceiptProject;User=root;Password=CPSC40801;Port=3306;";
+            
+            using (var conn = new MySqlConnection(connectionString))
+            {
+                conn.Open();
                 var amountQuery =
-                    new SqlCommand(
-                        "SELECT * FROM ReceiptProject.receipts JOIN ReceiptProject.user u on receipts.userID = u.userID WHERE purchaseDate BETWEEN @minAmount and @maxAmount ORDER BY purchaseDate",
+                    new MySqlCommand(
+                        "SELECT * FROM receipts JOIN user u ON receipts.userID = u.userID WHERE amount BETWEEN @minAmount AND @maxAmount ORDER BY purchaseDate",
                         conn);
-                amountQuery.Parameters.AddValue("@minAmount", minAmount);
-                amountQuery.Parameters.AddValue("@maxAmount", maxAmount);
+                amountQuery.Parameters.AddWithValue("@minAmount", minAmount);
+                amountQuery.Parameters.AddWithValue("@maxAmount", maxAmount);
 
-                var amountReader = amountQuery.ExecuteReader()
+                var amountReader = amountQuery.ExecuteReader();
                 while (amountReader.Read())
                 {
-
                     receiptsByAmount.Add(new Receipt
                     {
                         ReceiptID = amountReader.GetInt32("receiptID"),
@@ -31,10 +33,10 @@ namespace SE320_Final
                         Vendor = amountReader.GetString("vendor"),
                         Amount = amountReader.GetDecimal("amount"),
                         PurchaseDate = amountReader.GetDateTime("purchaseDate"),
-                        ImagePath = amountReader.IsDBNull(reader.GetOrdinal("imagePath"))
+                        ImagePath = amountReader.IsDBNull(amountReader.GetOrdinal("imagePath"))
                             ? null
                             : amountReader.GetString("imagePath"),
-                        MetadataJson = amountReader.IsDBNull(reader.GetOrdinal("metadataJson"))
+                        MetadataJson = amountReader.IsDBNull(amountReader.GetOrdinal("metadataJson"))
                             ? null
                             : amountReader.GetString("metadataJson")
                     });
