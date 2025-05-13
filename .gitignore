@@ -1,0 +1,34 @@
+# Rider specific
+.idea/
+
+# Build directories
+bin/
+obj/
+
+# Rider project files
+receiptProject/obj/Debug/
+receiptProject/bin/Debug/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+*.nuspec
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Rider specific files
+receiptProject/obj/rider.project.model.nuget.info
+receiptProject/obj/rider.project.restore.info
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+# Logs
+*.log
+
+# Visual Studio specific
+.vscode/
+.vs/
