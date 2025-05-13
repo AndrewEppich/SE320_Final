@@ -140,3 +140,28 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2025-05-01 18:33:33
+
+
+-- Insert dummy users
+INSERT INTO user (email, password) VALUES
+('alice@example.com', 'password123'),
+('bob@example.com', 'secure456'),
+('carol@example.com', 'qwerty789');
+
+-- Insert dummy receipts
+INSERT INTO receipts (userID, vendor, amount, purchaseDate, imagePath, metadataJson) VALUES
+(1, 'Amazon', 120.45, '2025-01-05', '/images/amazon1.jpg', '{"category":"electronics"}'),
+(2, 'Walmart', 52.30, '2025-01-12', '/images/walmart1.jpg', '{"category":"groceries"}'),
+(1, 'Target', 89.99, '2025-01-20', '/images/target1.jpg', '{"category":"clothing"}');
+
+-- Insert dummy receiptItems
+INSERT INTO receiptItems (receiptID, itemName, quantity, unitPrice, totalPrice, rawText) VALUES
+(1, 'Bluetooth Speaker', 1, 120.45, 120.45, '1x Bluetooth Speaker $120.45'),
+(2, 'Milk', 2, 2.50, 5.00, '2x Milk $2.50'),
+(2, 'Bread', 1, 2.30, 2.30, '1x Bread $2.30'),
+(3, 'Jeans', 1, 89.99, 89.99, '1x Jeans $89.99');
+
+-- Insert dummy summaries
+INSERT INTO summaries (userID, summaryType, startDate, endDate, totalSpent, dataJson) VALUES
+(1, 'monthly', '2025-01-01', '2025-01-31', 210.44, '{"Amazon": 120.45, "Target": 89.99}'),
+(2, 'monthly', '2025-01-01', '2025-01-31', 7.30, '{"Walmart": 7.30}');
