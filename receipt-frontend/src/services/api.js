@@ -1,10 +1,16 @@
 const API_BASE_URL = 'https://localhost:7096'; // Try HTTP first
 
 export const api = {
-    async getReceipts() {
+    async getReceipts(sortBy = null, sortOrder = 'asc') {
         try {
-            console.log('Attempting to fetch from:', `${API_BASE_URL}/api/Receipts`);
-            const response = await fetch(`${API_BASE_URL}/api/Receipts`, {
+            const queryParams = new URLSearchParams();
+            if (sortBy) {
+                queryParams.append('sortBy', sortBy);
+                queryParams.append('sortOrder', sortOrder);
+            }
+            
+            console.log('Attempting to fetch from:', `${API_BASE_URL}/api/Receipts?${queryParams.toString()}`);
+            const response = await fetch(`${API_BASE_URL}/api/Receipts?${queryParams.toString()}`, {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
