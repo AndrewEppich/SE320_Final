@@ -1,31 +1,39 @@
 import { useEffect, useState } from 'react';
-import { Container, Card, ListGroup, Alert, Spinner } from 'react-bootstrap';
+import { Container, Card, ListGroup, Alert, Spinner, Button, ButtonGroup } from 'react-bootstrap';
 import { api } from '../services/api';
 
 function History() {
     const [receipts, setReceipts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [sortConfig, setSortConfig] = useState({ field: null, order: 'asc' });
 
     useEffect(() => {
-        const fetchReceipts = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-                console.log('Fetching receipts...');
-                const data = await api.getReceipts();
-                console.log('Received data:', data);
-                setReceipts(data);
-            } catch (err) {
-                console.error('Error in History component:', err);
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchReceipts();
-    }, []);
+    }, [sortConfig]);
+
+    const fetchReceipts = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            console.log('Fetching receipts...');
+            const data = await api.getReceipts(sortConfig.field, sortConfig.order);
+            console.log('Received data:', data);
+            setReceipts(data);
+        } catch (err) {
+            console.error('Error in History component:', err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSort = (field) => {
+        setSortConfig(prevConfig => ({
+            field,
+            order: prevConfig.field === field && prevConfig.order === 'asc' ? 'desc' : 'asc'
+        }));
+    };
 
     if (loading) {
         return (
@@ -60,6 +68,22 @@ function History() {
     return (
         <Container className="py-4">
             <h1>Receipt History</h1>
+            <div className="mb-3">
+                <ButtonGroup>
+                    <Button 
+                        variant={sortConfig.field === 'date' ? 'primary' : 'outline-primary'}
+                        onClick={() => handleSort('date')}
+                    >
+                        Sort by Date {sortConfig.field === 'date' && (sortConfig.order === 'asc' ? '↑' : '↓')}
+                    </Button>
+                    <Button 
+                        variant={sortConfig.field === 'amount' ? 'primary' : 'outline-primary'}
+                        onClick={() => handleSort('amount')}
+                    >
+                        Sort by Amount {sortConfig.field === 'amount' && (sortConfig.order === 'asc' ? '↑' : '↓')}
+                    </Button>
+                </ButtonGroup>
+            </div>
             {receipts.length === 0 ? (
                 <Alert variant="info">No receipts found.</Alert>
             ) : (
