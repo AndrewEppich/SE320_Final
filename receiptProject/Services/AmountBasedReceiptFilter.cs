@@ -18,7 +18,7 @@ namespace receiptProject.Services
                 conn.Open();
                 var amountQuery =
                     new MySqlCommand(
-                        "SELECT * FROM receipts JOIN user u ON receipts.userID = u.userID WHERE amount BETWEEN @minAmount AND @maxAmount ORDER BY purchaseDate",
+                        "SELECT * FROM receipts INNER JOIN user u ON receipts.userID = u.userID WHERE amount BETWEEN @minAmount AND @maxAmount ORDER BY purchaseDate",
                         conn);
                 amountQuery.Parameters.AddWithValue("@minAmount", minAmount);
                 amountQuery.Parameters.AddWithValue("@maxAmount", maxAmount);

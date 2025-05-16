@@ -17,7 +17,7 @@ namespace receiptProject.Services
             {
                 conn.Open();
                 var dateQuery = new MySqlCommand(
-                    "SELECT * FROM receipts JOIN user u ON receipts.userID = u.userID WHERE purchaseDate BETWEEN @startDate AND @endDate ORDER BY purchaseDate", 
+                    "SELECT * FROM receipts INNER JOIN user u ON receipts.userID = u.userID WHERE purchaseDate BETWEEN @startDate AND @endDate ORDER BY purchaseDate", 
                     conn);
                 dateQuery.Parameters.AddWithValue("@startDate", startDate);
                 dateQuery.Parameters.AddWithValue("@endDate", endDate);

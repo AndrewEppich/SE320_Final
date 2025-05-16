@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using receiptProject.Services;
+using System.Linq;
 
 namespace receiptProject.Controllers
 {
@@ -18,13 +19,28 @@ namespace receiptProject.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Receipt>>> GetReceipts()
+        public async Task<ActionResult<IEnumerable<Receipt>>> GetReceipts([FromQuery] string? sortBy = null, [FromQuery] string? sortOrder = "asc")
         {
             try
             {
-
                 int userId = 1;
                 var receipts = await _repository.GetAllReceiptsAsync(userId);
+
+                // Apply sorting
+                if (!string.IsNullOrEmpty(sortBy))
+                {
+                    receipts = sortBy.ToLower() switch
+                    {
+                        "amount" => sortOrder.ToLower() == "desc" 
+                            ? receipts.OrderByDescending(r => r.Amount)
+                            : receipts.OrderBy(r => r.Amount),
+                        "date" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.PurchaseDate)
+                            : receipts.OrderBy(r => r.PurchaseDate),
+                        _ => receipts
+                    };
+                }
+
                 return Ok(receipts);
             }
             catch (Exception ex)
