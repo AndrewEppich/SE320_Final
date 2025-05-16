@@ -16,6 +16,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 
 builder.Services.AddScoped<IReceiptRepository, ReceiptRepository>();
+builder.Services.AddScoped<WeeklySummaryFilter>();
+builder.Services.AddScoped<MonthlySummaryFilter>();
+builder.Services.AddScoped<VendorFilter>();
 
 
 builder.Services.AddCors(options =>
@@ -23,9 +26,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("ReactAppPolicy",
         policy =>
         {
-           // policy.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
-           policy
-                .AllowAnyOrigin()
+            policy.WithOrigins("http://localhost:3000")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
