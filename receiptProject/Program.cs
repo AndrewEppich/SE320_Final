@@ -26,12 +26,18 @@ builder.Services.AddCors(options =>
     options.AddPolicy("ReactAppPolicy",
         policy =>
         {
-           // policy.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
+           // Option 1: Allow specific origin with credentials
            policy
-                .AllowAnyOrigin()
+                .WithOrigins("http://localhost:3000")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
+           
+           // Option 2: Allow any origin but without credentials
+           // policy
+           //     .AllowAnyOrigin()
+           //     .AllowAnyHeader()
+           //     .AllowAnyMethod();
         });
 });
 
