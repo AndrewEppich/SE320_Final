@@ -146,4 +146,17 @@ namespace receiptProject.Controllers
             }
         }
     }
+
+        [HttpGet("filter")]
+        public async Task<ActionResult<IEnumerable<Receipt>>> FilterReceipts(
+            [FromQuery] DateTime? startDate,
+            [FromQuery] DateTime? endDate,
+            [FromQuery] decimal? minAmount,
+            [FromQuery] decimal? maxAmount,
+            [FromQuery] string? vendor)
+        {
+            var results = await _repository.FilterReceiptsAsync(startDate, endDate, minAmount, maxAmount, vendor);
+            return Ok(results);
+        }
+
 } 
