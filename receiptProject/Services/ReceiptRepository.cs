@@ -1,5 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using receiptProject.Data;
+using receiptProject.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace receiptProject.Services
 {
@@ -14,51 +19,17 @@ namespace receiptProject.Services
 
         public async Task<IEnumerable<Receipt>> GetAllReceiptsAsync(int userId)
         {
-            return await _context.Receipts
-                .Where(r => r.UserID == userId)
-                .Include(r => r.Items)
-                .ToListAsync();
+            return await _context.Receipts.Where(r => r.UserID == userId).ToListAsync();
         }
 
-        public async Task<Receipt?> GetReceiptByIdAsync(int receiptId, int userId)
+        public async Task<Receipt?> GetReceiptByIdAsync(int id)
         {
-            return await _context.Receipts
-                .Where(r => r.ReceiptID == receiptId && r.UserID == userId)
-                .Include(r => r.Items)
-                .FirstOrDefaultAsync();
+            return await _context.Receipts.FirstOrDefaultAsync(r => r.ReceiptID == id);
         }
 
-        public async Task<Receipt> AddReceiptAsync(Receipt receipt)
+        public async Task<bool> DeleteReceiptAsync(int id)
         {
-            _context.Receipts.Add(receipt);
-            await _context.SaveChangesAsync();
-            return receipt;
-        }
-
-        public async Task<bool> UpdateReceiptAsync(Receipt receipt)
-        {
-            _context.Entry(receipt).State = EntityState.Modified;
-            
-            try
-            {
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await ReceiptExists(receipt.ReceiptID))
-                {
-                    return false;
-                }
-                throw;
-            }
-        }
-
-        public async Task<bool> DeleteReceiptAsync(int receiptId, int userId)
-        {
-            var receipt = await _context.Receipts
-                .FirstOrDefaultAsync(r => r.ReceiptID == receiptId && r.UserID == userId);
-                
+            var receipt = await _context.Receipts.FindAsync(id);
             if (receipt == null)
             {
                 return false;
@@ -69,9 +40,26 @@ namespace receiptProject.Services
             return true;
         }
 
-        private async Task<bool> ReceiptExists(int receiptId)
+        public async Task<IEnumerable<Receipt>> FilterReceiptsAsync(DateTime? startDate, DateTime? endDate, decimal? minAmount, decimal? maxAmount, string? vendor)
         {
-            return await _context.Receipts.AnyAsync(r => r.ReceiptID == receiptId);
+            var query = _context.Receipts.AsQueryable();
+
+            if (startDate.HasValue)
+                query = query.Where(r => r.PurchaseDate >= startDate.Value);
+
+            if (endDate.HasValue)
+                query = query.Where(r => r.PurchaseDate <= endDate.Value);
+
+            if (minAmount.HasValue)
+                query = query.Where(r => r.Amount >= minAmount.Value);
+
+            if (maxAmount.HasValue)
+                query = query.Where(r => r.Amount <= maxAmount.Value);
+
+            if (!string.IsNullOrEmpty(vendor))
+                query = query.Where(r => r.Vendor.ToLower().Contains(vendor.ToLower()));
+
+            return await query.ToListAsync();
         }
     }
-} 
+}
