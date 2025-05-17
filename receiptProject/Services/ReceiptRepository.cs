@@ -73,5 +73,29 @@ namespace receiptProject.Services
         {
             return await _context.Receipts.AnyAsync(r => r.ReceiptID == receiptId);
         }
+
+        public async Task<IEnumerable<Receipt>> GetReceiptsByDateRangeAsync(int userId, DateTime startDate, DateTime endDate)
+        {
+            return await _context.Receipts
+                .Where(r => r.UserID == userId && r.PurchaseDate >= startDate && r.PurchaseDate <= endDate)
+                .Include(r => r.Items)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Receipt>> GetReceiptsByAmountRangeAsync(int userId, decimal minAmount, decimal maxAmount)
+        {
+            return await _context.Receipts
+                .Where(r => r.UserID == userId && r.Amount >= minAmount && r.Amount <= maxAmount)
+                .Include(r => r.Items)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Receipt>> GetReceiptsByVendorAsync(int userId, string vendor)
+        {
+            return await _context.Receipts
+                .Where(r => r.UserID == userId && r.Vendor != null && r.Vendor.ToLower().Contains(vendor.ToLower()))
+                .Include(r => r.Items)
+                .ToListAsync();
+        }
     }
 } 
