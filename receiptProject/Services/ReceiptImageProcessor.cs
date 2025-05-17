@@ -1,6 +1,7 @@
 using Google.Cloud.Vision.V1;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
+using System.Text.Json;
 
 namespace receiptProject.Services
 {
@@ -13,14 +14,29 @@ namespace receiptProject.Services
         {
             try
             {
-                var credentialsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "se320final-42ad9e1a7f6d.json");
-                if (!File.Exists(credentialsPath))
+
+                var credentialsJson = configuration["GoogleCloudCredentials"];
+                if (string.IsNullOrEmpty(credentialsJson))
                 {
-                    throw new InvalidOperationException($"Google Cloud credentials file not found at: {credentialsPath}");
+                    throw new InvalidOperationException("Google Cloud credentials not found in configuration");
                 }
 
-                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialsPath);
-                _visionClient = ImageAnnotatorClient.Create();
+                var tempPath = Path.GetTempFileName();
+                File.WriteAllText(tempPath, credentialsJson);
+                
+                try
+                {
+                    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", tempPath);
+                    _visionClient = ImageAnnotatorClient.Create();
+                }
+                finally
+                {
+                    if (File.Exists(tempPath))
+                    {
+                        File.Delete(tempPath);
+                    }
+                }
+                
                 _logger = logger;
             }
             catch (Exception ex)
