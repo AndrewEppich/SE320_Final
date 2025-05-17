@@ -26,7 +26,6 @@ namespace receiptProject.Controllers
                 int userId = 1;
                 var receipts = await _repository.GetAllReceiptsAsync(userId);
 
-                // Apply sorting
                 if (!string.IsNullOrEmpty(sortBy))
                 {
                     receipts = sortBy.ToLower() switch
@@ -50,6 +49,109 @@ namespace receiptProject.Controllers
             }
         }
 
+        [HttpGet("date-range")]
+        public async Task<ActionResult<IEnumerable<Receipt>>> GetReceiptsByDateRange(
+            [FromQuery] DateTime startDate,
+            [FromQuery] DateTime endDate,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] string? sortOrder = "asc")
+        {
+            try
+            {
+                int userId = 1;
+                var receipts = await _repository.GetReceiptsByDateRangeAsync(userId, startDate, endDate);
+
+                if (!string.IsNullOrEmpty(sortBy))
+                {
+                    receipts = sortBy.ToLower() switch
+                    {
+                        "amount" => sortOrder.ToLower() == "desc" 
+                            ? receipts.OrderByDescending(r => r.Amount)
+                            : receipts.OrderBy(r => r.Amount),
+                        "date" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.PurchaseDate)
+                            : receipts.OrderBy(r => r.PurchaseDate),
+                        _ => receipts
+                    };
+                }
+
+                return Ok(receipts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting receipts by date range");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("amount-range")]
+        public async Task<ActionResult<IEnumerable<Receipt>>> GetReceiptsByAmountRange(
+            [FromQuery] decimal minAmount,
+            [FromQuery] decimal maxAmount,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] string? sortOrder = "asc")
+        {
+            try
+            {
+                int userId = 1;
+                var receipts = await _repository.GetReceiptsByAmountRangeAsync(userId, minAmount, maxAmount);
+
+                if (!string.IsNullOrEmpty(sortBy))
+                {
+                    receipts = sortBy.ToLower() switch
+                    {
+                        "amount" => sortOrder.ToLower() == "desc" 
+                            ? receipts.OrderByDescending(r => r.Amount)
+                            : receipts.OrderBy(r => r.Amount),
+                        "date" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.PurchaseDate)
+                            : receipts.OrderBy(r => r.PurchaseDate),
+                        _ => receipts
+                    };
+                }
+
+                return Ok(receipts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting receipts by amount range");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("vendor")]
+        public async Task<ActionResult<IEnumerable<Receipt>>> GetReceiptsByVendor(
+            [FromQuery] string vendor,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] string? sortOrder = "asc")
+        {
+            try
+            {
+                int userId = 1;
+                var receipts = await _repository.GetReceiptsByVendorAsync(userId, vendor);
+
+                if (!string.IsNullOrEmpty(sortBy))
+                {
+                    receipts = sortBy.ToLower() switch
+                    {
+                        "amount" => sortOrder.ToLower() == "desc" 
+                            ? receipts.OrderByDescending(r => r.Amount)
+                            : receipts.OrderBy(r => r.Amount),
+                        "date" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.PurchaseDate)
+                            : receipts.OrderBy(r => r.PurchaseDate),
+                        _ => receipts
+                    };
+                }
+
+                return Ok(receipts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting receipts by vendor");
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Receipt>> GetReceipt(int id)
