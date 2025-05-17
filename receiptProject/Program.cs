@@ -19,6 +19,7 @@ builder.Services.AddScoped<IReceiptRepository, ReceiptRepository>();
 builder.Services.AddScoped<WeeklySummaryFilter>();
 builder.Services.AddScoped<MonthlySummaryFilter>();
 builder.Services.AddScoped<VendorFilter>();
+builder.Services.AddScoped<ReceiptImageProcessor>();
 
 
 builder.Services.AddCors(options =>
