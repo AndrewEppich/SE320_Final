@@ -10,11 +10,16 @@ namespace receiptProject.Controllers
     {
         private readonly IReceiptRepository _repository;
         private readonly ILogger<ReceiptsController> _logger;
+        private readonly ReceiptImageProcessor _imageProcessor;
 
-        public ReceiptsController(IReceiptRepository repository, ILogger<ReceiptsController> logger)
+        public ReceiptsController(
+            IReceiptRepository repository, 
+            ILogger<ReceiptsController> logger,
+            ReceiptImageProcessor imageProcessor)
         {
             _repository = repository;
             _logger = logger;
+            _imageProcessor = imageProcessor;
         }
 
 
@@ -143,6 +148,34 @@ namespace receiptProject.Controllers
             {
                 _logger.LogError(ex, "Error deleting receipt {Id}", id);
                 return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPost("scan")]
+        public async Task<ActionResult<Receipt>> ScanReceipt(IFormFile image)
+        {
+            try
+            {
+                if (image == null || image.Length == 0)
+                {
+                    return BadRequest("No image file provided");
+                }
+
+                // Process the image and extract receipt information
+                using var stream = image.OpenReadStream();
+                var receipt = await _imageProcessor.ProcessReceiptImage(stream);
+
+                // Set the user ID
+                receipt.UserID = 1;
+
+                // Save the receipt to the database
+                var createdReceipt = await _repository.AddReceiptAsync(receipt);
+                return CreatedAtAction(nameof(GetReceipt), new { id = createdReceipt.ReceiptID }, createdReceipt);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error scanning receipt image");
+                return StatusCode(500, "Error processing receipt image");
             }
         }
     }
