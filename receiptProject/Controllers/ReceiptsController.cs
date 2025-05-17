@@ -161,16 +161,34 @@ namespace receiptProject.Controllers
                     return BadRequest("No image file provided");
                 }
 
-                // Process the image and extract receipt information
+                var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif" };
+                if (!allowedTypes.Contains(image.ContentType.ToLower()))
+                {
+                    return BadRequest("Invalid file type. Only JPEG, PNG, and GIF images are allowed.");
+                }
+
+                if (image.Length > 10 * 1024 * 1024)
+                {
+                    return BadRequest("File size too large. Maximum size is 10MB.");
+                }
+
                 using var stream = image.OpenReadStream();
                 var receipt = await _imageProcessor.ProcessReceiptImage(stream);
 
-                // Set the user ID
                 receipt.UserID = 1;
 
-                // Save the receipt to the database
                 var createdReceipt = await _repository.AddReceiptAsync(receipt);
                 return CreatedAtAction(nameof(GetReceipt), new { id = createdReceipt.ReceiptID }, createdReceipt);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Invalid image data provided");
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Failed to process receipt image");
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

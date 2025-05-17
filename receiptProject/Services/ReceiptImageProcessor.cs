@@ -11,19 +11,32 @@ namespace receiptProject.Services
 
         public ReceiptImageProcessor(ILogger<ReceiptImageProcessor> logger, IConfiguration configuration)
         {
-            var credentialsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "se320final-42ad9e1a7f6d.json");
-            if (!File.Exists(credentialsPath))
+            try
             {
-                throw new InvalidOperationException($"Google Cloud credentials file not found at: {credentialsPath}");
-            }
+                var credentialsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "se320final-42ad9e1a7f6d.json");
+                if (!File.Exists(credentialsPath))
+                {
+                    throw new InvalidOperationException($"Google Cloud credentials file not found at: {credentialsPath}");
+                }
 
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialsPath);
-            _visionClient = ImageAnnotatorClient.Create();
-            _logger = logger;
+                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialsPath);
+                _visionClient = ImageAnnotatorClient.Create();
+                _logger = logger;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to initialize Google Cloud Vision client");
+                throw;
+            }
         }
 
         public async Task<Receipt> ProcessReceiptImage(Stream imageStream)
         {
+            if (imageStream == null || imageStream.Length == 0)
+            {
+                throw new ArgumentException("Image stream is empty or null");
+            }
+
             try
             {
                 using var memoryStream = new MemoryStream();
@@ -31,17 +44,28 @@ namespace receiptProject.Services
                 var imageBytes = memoryStream.ToArray();
 
                 var image = Image.FromBytes(imageBytes);
-
                 var response = await _visionClient.DetectTextAsync(image);
-                var fullText = response.FullTextAnnotation?.Text ?? string.Empty;
+                
+                if (response.FullTextAnnotation == null || string.IsNullOrEmpty(response.FullTextAnnotation.Text))
+                {
+                    throw new InvalidOperationException("No text could be detected in the image");
+                }
+
+                var fullText = response.FullTextAnnotation.Text;
+                _logger.LogInformation("Successfully extracted text from receipt image");
 
                 var receipt = new Receipt
                 {
                     PurchaseDate = ExtractDate(fullText),
                     Amount = ExtractAmount(fullText),
                     Vendor = ExtractVendor(fullText),
-                    MetadataJson = fullText 
+                    MetadataJson = fullText
                 };
+
+                if (receipt.Amount == null && receipt.Vendor == null && receipt.PurchaseDate == null)
+                {
+                    _logger.LogWarning("Could not extract any receipt information from the text");
+                }
 
                 return receipt;
             }
@@ -63,8 +87,8 @@ namespace receiptProject.Services
 
             foreach (var pattern in datePatterns)
             {
-                var match = Regex.Match(text, pattern);
-                if (match.Success)
+                var matches = Regex.Matches(text, pattern);
+                foreach (Match match in matches)
                 {
                     if (DateTime.TryParse(match.Value, out DateTime date))
                     {
@@ -83,15 +107,19 @@ namespace receiptProject.Services
                 @"TOTAL\s*\$?\s*(\d+\.\d{2})",
                 @"TOTAL\s*DUE\s*\$?\s*(\d+\.\d{2})",
                 @"AMOUNT\s*DUE\s*\$?\s*(\d+\.\d{2})",
-                @"\$?\s*(\d+\.\d{2})\s*TOTAL"
+                @"\$?\s*(\d+\.\d{2})\s*TOTAL",
+                @"\$?\s*(\d+\.\d{2})\s*$"
             };
 
             foreach (var pattern in totalPatterns)
             {
-                var match = Regex.Match(text, pattern, RegexOptions.IgnoreCase);
-                if (match.Success && decimal.TryParse(match.Groups[1].Value, out decimal amount))
+                var matches = Regex.Matches(text, pattern, RegexOptions.IgnoreCase);
+                foreach (Match match in matches)
                 {
-                    return amount;
+                    if (decimal.TryParse(match.Groups[1].Value, out decimal amount))
+                    {
+                        return amount;
+                    }
                 }
             }
 
@@ -101,15 +129,13 @@ namespace receiptProject.Services
         private string? ExtractVendor(string text)
         {
             var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            var commonWords = new[] { "RECEIPT", "TOTAL", "DATE", "TIME", "CASH", "CARD", "PAYMENT", "THANK", "YOU" };
             
-            foreach (var line in lines)
+            foreach (var line in lines.Take(5)) // Only look at first 5 lines
             {
                 var trimmedLine = line.Trim();
                 if (!string.IsNullOrWhiteSpace(trimmedLine) && 
-                    !trimmedLine.Contains("RECEIPT") && 
-                    !trimmedLine.Contains("TOTAL") &&
-                    !trimmedLine.Contains("DATE") &&
-                    !trimmedLine.Contains("TIME"))
+                    !commonWords.Any(word => trimmedLine.ToUpper().Contains(word)))
                 {
                     return trimmedLine;
                 }
