@@ -19,6 +19,29 @@ This is the .NET backend API for the Receipt Project.
 }
 ```
 
+## Google Cloud Vision API Setup
+
+To use the receipt scanning functionality, you'll need to set up Google Cloud Vision API credentials:
+
+1. For repository members:
+   - Go to the repository on GitHub
+   - Click on "Actions"
+   - Select the "Setup Credentials" workflow
+   - Click "Run workflow"
+   - Select "development" environment
+   - Click "Run workflow"
+   - This will create a pull request with the credentials
+   - Merge the pull request to update your local credentials
+
+2. For local development without repository access:
+   - Create a Google Cloud project and enable the Vision API
+   - Create a service account and download the JSON credentials file
+   - Copy the contents of your credentials JSON file
+   - Open `appsettings.Development.json`
+   - Replace `"YOUR_CREDENTIALS_JSON_HERE"` with your actual credentials JSON
+
+Note: The Google Cloud Vision API is a paid service. Make sure to monitor your usage and set up billing alerts in your Google Cloud Console.
+
 ## Running the Application
 
 1. Navigate to the project directory:

@@ -1,8 +1,9 @@
 # Google Cloud credentials
-se320final-42ad9e1a7f6d.json
+se320final-*.json
+se320final-e34939b6ee16.json
 *.json
 !appsettings.json
-!appsettings.Development.json
+# appsettings.Development.json is intentionally ignored as it may contain sensitive credentials
 
 # Build results
 [Dd]ebug/
