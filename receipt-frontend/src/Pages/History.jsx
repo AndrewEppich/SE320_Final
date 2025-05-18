@@ -82,6 +82,12 @@ function History() {
                     >
                         Sort by Amount {sortConfig.field === 'amount' && (sortConfig.order === 'asc' ? '↑' : '↓')}
                     </Button>
+                    <Button
+                        variant={sortConfig.field === 'vendor' ? 'primary' : 'outline-primary'}
+                        onClick={() => handleSort('vendor')}
+                    >
+                        Sort by Vendor {sortConfig.field === 'vendor' && (sortConfig.order === 'asc' ? '↑' : '↓')}
+                    </Button>
                 </ButtonGroup>
             </div>
             {receipts.length === 0 ? (
