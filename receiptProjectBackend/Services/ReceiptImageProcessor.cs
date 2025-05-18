@@ -60,14 +60,14 @@ namespace receiptProject.Services
                 var imageBytes = memoryStream.ToArray();
 
                 var image = Image.FromBytes(imageBytes);
-                var response = await _visionClient.DetectTextAsync(image);
+                var response = await _visionClient.DetectDocumentTextAsync(image);
                 
-                if (response.FullTextAnnotation == null || string.IsNullOrEmpty(response.FullTextAnnotation.Text))
+                if (response == null || string.IsNullOrEmpty(response.Text))
                 {
                     throw new InvalidOperationException("No text could be detected in the image");
                 }
 
-                var fullText = response.FullTextAnnotation.Text;
+                var fullText = response.Text;
                 _logger.LogInformation("Successfully extracted text from receipt image");
 
                 var receipt = new Receipt
