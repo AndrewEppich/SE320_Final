@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using receiptProject.Services;
 using System.Linq;
 
-namespace receiptProject.Controllers
+namespace receiptProject.receiptProject.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
