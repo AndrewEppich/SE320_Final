@@ -43,15 +43,6 @@ namespace receiptProject.receiptProjectBackend.Data
                 .WithMany(r => r.Items)
                 .HasForeignKey(ri => ri.ReceiptID);
 
-
-            modelBuilder.Entity<Summary>()
-                .ToTable("summaries")
-                .HasKey(s => s.SummaryID);
-
-            modelBuilder.Entity<Summary>()
-                .HasOne(s => s.User)
-                .WithMany(u => u.Summaries)
-                .HasForeignKey(s => s.UserID);
         }
     }
 } 

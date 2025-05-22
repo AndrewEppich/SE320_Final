@@ -6,31 +6,17 @@ using receiptProject.receiptProjectBackend.Data;
 using System.Linq;
 using System.Text.Json;
 
-namespace receiptProject.receiptProjectBackend.Services{
-    public class MonthlySummaryFilter
-    {
+namespace receiptProject.receiptProjectBackend.Services {
+    public class MonthlySummaryFilter {
         private readonly AppDbContext _context;
 
-        public MonthlySummaryFilter(AppDbContext context)
-        {
+        public MonthlySummaryFilter(AppDbContext context) {
             _context = context;
         }
 
-        public async Task<Summary> GetMonthlySummary(int userId, int year, int month)
-        {
+        public async Task<object> GetMonthlySummary(int userId, int year, int month) {
             var startDate = new DateTime(year, month, 1);
             var endDate = startDate.AddMonths(1);
-
-            var existingSummary = await _context.Summaries
-                .FirstOrDefaultAsync(s => s.UserID == userId && 
-                                         s.SummaryType == "monthly" && 
-                                         s.StartDate == startDate && 
-                                         s.EndDate == endDate);
-
-            if (existingSummary != null)
-            {
-                return existingSummary;
-            }
 
             var receipts = await _context.Receipts
                 .Where(r => r.UserID == userId && 
@@ -39,16 +25,13 @@ namespace receiptProject.receiptProjectBackend.Services{
                 .Include(r => r.Items)
                 .ToListAsync();
 
-            if (!receipts.Any())
-            {
-                return new Summary
-                {
-                    UserID = userId,
-                    SummaryType = "monthly",
-                    StartDate = startDate,
-                    EndDate = endDate,
-                    TotalSpent = 0,
-                    DataJson = JsonSerializer.Serialize(new { receipts = new List<Receipt>() })
+            if (!receipts.Any()) {
+                return new {
+                    totalReceipts = 0,
+                    totalSpent = 0,
+                    weeklyTotals = new List<object>(),
+                    vendorTotals = new List<object>(),
+                    receipts = new List<object>()
                 };
             }
 
@@ -56,8 +39,7 @@ namespace receiptProject.receiptProjectBackend.Services{
 
             var weeklyTotals = receipts
                 .GroupBy(r => (r.PurchaseDate?.Day - 1) / 7 + 1)
-                .Select(g => new
-                {
+                .Select(g => new {
                     WeekOfMonth = g.Key,
                     Total = g.Sum(r => r.Amount ?? 0),
                     Count = g.Count()
@@ -66,8 +48,7 @@ namespace receiptProject.receiptProjectBackend.Services{
 
             var vendorTotals = receipts
                 .GroupBy(r => r.Vendor)
-                .Select(g => new
-                {
+                .Select(g => new {
                     Vendor = g.Key,
                     Total = g.Sum(r => r.Amount ?? 0),
                     Count = g.Count()
@@ -75,29 +56,13 @@ namespace receiptProject.receiptProjectBackend.Services{
                 .OrderByDescending(g => g.Total)
                 .ToList();
 
-            var summaryData = new
-            {
+            return new {
                 totalReceipts = receipts.Count,
                 totalSpent,
                 weeklyTotals,
                 vendorTotals,
                 receipts
             };
-
-            var summary = new Summary
-            {
-                UserID = userId,
-                SummaryType = "monthly",
-                StartDate = startDate,
-                EndDate = endDate,
-                TotalSpent = totalSpent,
-                DataJson = JsonSerializer.Serialize(summaryData)
-            };
-
-            _context.Summaries.Add(summary);
-            await _context.SaveChangesAsync();
-
-            return summary;
         }
     }
 } 
