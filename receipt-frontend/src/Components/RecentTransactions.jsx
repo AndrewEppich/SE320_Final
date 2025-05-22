@@ -1,59 +1,81 @@
-import { Container, Row, Col, Card, Button, ListGroup, Nav } from "react-bootstrap";
+import { useEffect, useState } from 'react';
+import { Container, Row, Col, Card, Button, ListGroup, Nav, Spinner, Alert } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import { api } from '../services/api';
 
 function RecentTransactions() {
-  return (
-      <Card className="mb-4">
-          <Card.Body>
-              <Card.Title>RECENT TRANSACTIONS</Card.Title>
-              <Nav
-                  variant="pills"
-                  className="mt-3"
-                  style={{
-                      '--bs-nav-pills-link-active-bg': '#6f42c1',
-                      '--bs-nav-link-color': '#6f42c1',
-                      '--bs-nav-link-hover-color': '#5a32a8'
-                  }}
-              >
-                  <Nav.Item>
-                      <Nav.Link
-                          active
-                          style={{
-                              color: 'white',
-                              fontWeight: 'bold'
-                          }}
-                      >
-                          1
-                      </Nav.Link>
-                  </Nav.Item>
-                  <Nav.Item>
-                      <Nav.Link
-                          style={{
-                              color: '#6f42c1' 
-                          }}
-                      >
-                          2
-                      </Nav.Link>
-                  </Nav.Item>
-                  <Nav.Item>
-                      <Nav.Link style={{ color: '#6f42c1' }}>3</Nav.Link>
-                  </Nav.Item>
-                  <Nav.Item>
-                      <Nav.Link style={{ color: '#6f42c1' }}>4</Nav.Link>
-                  </Nav.Item>
-              </Nav>
-              <ListGroup variant="flush">
-                  <ListGroup.Item className="d-flex justify-content-between align-items-center">
-                      <div>
-                          <h5>---</h5>
-                          <small className="text-muted">---</small>
-                      </div>
-                      <span>$---</span>
-                  </ListGroup.Item>
-              </ListGroup>
-          </Card.Body>
-      </Card>
-  );
+    const [receipts, setReceipts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        fetchRecentReceipts();
+    }, []);
+
+    const fetchRecentReceipts = async () => {
+        try {
+            setLoading(true);
+            // Get all receipts sorted by date in descending order
+            const data = await api.getReceipts('date', 'desc');
+            // Take only the first 5 receipts
+            setReceipts(data.slice(0, 5));
+        } catch (err) {
+            console.error('Error fetching recent receipts:', err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <Card>
+                <Card.Body className="text-center">
+                    <Spinner animation="border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </Spinner>
+                </Card.Body>
+            </Card>
+        );
+    }
+
+    if (error) {
+        return (
+            <Card>
+                <Card.Body>
+                    <Alert variant="danger">
+                        <Alert.Heading>Error Loading Recent Transactions</Alert.Heading>
+                        <p>{error}</p>
+                    </Alert>
+                </Card.Body>
+            </Card>
+        );
+    }
+
+    return (
+        <Card>
+            <Card.Body>
+                <Card.Title className="mb-4">Recent Transactions</Card.Title>
+                {receipts.length === 0 ? (
+                    <p className="text-muted">No recent transactions found.</p>
+                ) : (
+                    <ListGroup variant="flush">
+                        {receipts.map(receipt => (
+                            <ListGroup.Item key={receipt.receiptID} className="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5>{receipt.vendor || 'Unknown Vendor'}</h5>
+                                    <small className="text-muted">
+                                        {new Date(receipt.purchaseDate).toLocaleDateString()}
+                                    </small>
+                                </div>
+                                <span>${(receipt.amount || 0).toFixed(2)}</span>
+                            </ListGroup.Item>
+                        ))}
+                    </ListGroup>
+                )}
+            </Card.Body>
+        </Card>
+    );
 }
 
 export default RecentTransactions;
