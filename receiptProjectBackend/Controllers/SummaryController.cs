@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using receiptProject.Services;
 
-namespace receiptProject.receiptProject.Controllers
+namespace receiptProject.receiptProjectBackend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
