@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using receiptProject.receiptProjectBackend.Data;
 using receiptProject.receiptProjectBackend.Services;
 using Google.Cloud.Vision.V1;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +24,14 @@ builder.Services.AddScoped<IReceiptRepository, ReceiptRepository>();
 builder.Services.AddScoped<WeeklySummaryFilter>();
 builder.Services.AddScoped<MonthlySummaryFilter>();
 builder.Services.AddScoped<VendorFilter>();
-builder.Services.AddScoped<ReceiptImageProcessor>();
+builder.Services.AddScoped<ReceiptImageProcessor>(provider => {
+    var logger = provider.GetRequiredService<ILogger<ReceiptImageProcessor>>();
+    var config = provider.GetRequiredService<IConfiguration>();
+    var observer = provider.GetRequiredService<ConsoleReceiptObserver>();
+    var processor = new ReceiptImageProcessor(logger, config);
+    processor.AddObserver(observer);
+    return processor;
+});
 builder.Services.AddSingleton(provider =>
 {
     return ImageAnnotatorClient.Create();
@@ -49,7 +57,7 @@ builder.Services.AddCors(options =>
            //     .AllowAnyMethod();
         });
 });
-
+builder.Services.AddSingleton<ConsoleReceiptObserver>();
 var app = builder.Build();
 
 
