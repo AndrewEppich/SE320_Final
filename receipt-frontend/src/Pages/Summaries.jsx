@@ -21,7 +21,6 @@ function Summaries() {
       setLoading(true);
       setError(null);
 
-      // Get current date info
       const now = new Date();
       const currentYear = now.getFullYear();
       const currentMonth = now.getMonth() + 1;
@@ -95,7 +94,7 @@ function Summaries() {
               {weeklySummary ? (
                 <>
                   <h5>Total Spent: ${weeklySummary.totalSpent?.toFixed(2)}</h5>
-                  <p>Receipts: {weeklySummary.dataJson?.totalReceipts || 0}</p>
+                  {/* <p>Receipts: {weeklySummary.dataJson?.totalReceipts || 0}</p> */}
                 </>
               ) : (
                 <p>No weekly data available</p>
@@ -111,7 +110,7 @@ function Summaries() {
               {monthlySummary ? (
                 <>
                   <h5>Total Spent: ${monthlySummary.totalSpent?.toFixed(2)}</h5>
-                  <p>Receipts: {monthlySummary.dataJson?.totalReceipts || 0}</p>
+                  {/* <p>Receipts: {monthlySummary.dataJson?.totalReceipts || 0}</p> */}
                 </>
               ) : (
                 <p>No monthly data available</p>
@@ -141,7 +140,7 @@ function Summaries() {
           {vendorSummary ? (
             <>
               <h5>Total Spent: ${vendorSummary.totalSpent?.toFixed(2)}</h5>
-              <p>Receipts: {vendorSummary.dataJson?.totalReceipts || 0}</p>
+              {/* <p>Receipts: {vendorSummary.dataJson?.totalReceipts || 0}</p> */}
             </>
           ) : (
             <p>Select a vendor to view summary</p>

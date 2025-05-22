@@ -17,6 +17,8 @@ function HomeMonthOverview() {
             setLoading(true);
             const now = new Date();
             const data = await api.getMonthlySummary(now.getFullYear(), now.getMonth() + 1);
+            console.log('Monthly Data:', data);
+            console.log('Vendor Totals:', data?.vendorTotals);
             setMonthlyData(data);
         } catch (err) {
             console.error('Error fetching monthly data:', err);
@@ -51,11 +53,10 @@ function HomeMonthOverview() {
         );
     }
 
-    // Get top vendors from vendorTotals with null checks
-    const topVendors = monthlyData?.vendorTotals
-        ?.slice(0, 3)
-        .map(v => `${v.Vendor || 'Unknown'} ($${(v.Total || 0).toFixed(2)})`)
-        .join(', ') || 'No data';
+    // Get top vendor from vendorTotals with proper null checks
+    const topVendor = monthlyData?.vendorTotals?.[0]
+        ? `${monthlyData.vendorTotals[0].vendor} ($${(monthlyData.vendorTotals[0].total || 0).toFixed(2)})`
+        : 'No data';
 
     // Calculate spending by category from metadata with null checks
     const categorySpending = monthlyData?.receipts?.reduce((acc, receipt) => {
@@ -86,8 +87,8 @@ function HomeMonthOverview() {
                     <Col md={4}>
                         <Card>
                             <Card.Body>
-                                <Card.Title>TOP VENDORS</Card.Title>
-                                <Card.Text className="fs-3">{topVendors}</Card.Text>
+                                <Card.Title>TOP VENDOR</Card.Title>
+                                <Card.Text className="fs-3">{topVendor}</Card.Text>
                             </Card.Body>
                         </Card>
                     </Col>
