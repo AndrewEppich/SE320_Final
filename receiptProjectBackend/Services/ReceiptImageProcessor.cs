@@ -147,7 +147,7 @@ namespace receiptProject.Services
             var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
             var commonWords = new[] { "RECEIPT", "TOTAL", "DATE", "TIME", "CASH", "CARD", "PAYMENT", "THANK", "YOU" };
             
-            foreach (var line in lines.Take(5)) // Only look at first 5 lines
+            foreach (var line in lines.Take(5))
             {
                 var trimmedLine = line.Trim();
                 if (!string.IsNullOrWhiteSpace(trimmedLine) && 

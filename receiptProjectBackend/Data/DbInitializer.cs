@@ -28,7 +28,8 @@ namespace receiptProject.Data
 
                 logger.LogInformation("Initializing database with SQL script");
 
-                var connectionString = configuration.GetConnectionString("DefaultConnection");
+                var connectionString =
+                    "Server=localhost;Database=ReceiptProject;User=root;Password=CPSC40801;Port=3306;AllowPublicKeyRetrieval=true;SslMode=none;";
                 if (string.IsNullOrEmpty(connectionString))
                 {
                     throw new InvalidOperationException("Database connection string is not configured.");
@@ -57,7 +58,7 @@ namespace receiptProject.Data
                     return;
                 }
 
-                var sqlScriptPath = Path.Combine(Directory.GetCurrentDirectory(), "Data", "receiptProject.sql");
+                var sqlScriptPath = Path.Combine(Directory.GetCurrentDirectory(), "receiptProjectBackend", "Data", "receiptProject.sql");
 
                 if (!File.Exists(sqlScriptPath))
                 {
