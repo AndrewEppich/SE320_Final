@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using receiptProject.receiptProjectBackend.Data;
 
-namespace receiptProject.Services
-{
+namespace receiptProject.receiptProjectBackend.Services{
     public class ReceiptRepository : IReceiptRepository
     {
         private readonly AppDbContext _context;

@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using receiptProject.Services;
+using receiptProject.receiptProjectBackend.Services;
 
 namespace receiptProject.receiptProjectBackend.Data
 {

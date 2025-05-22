@@ -1,7 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace receiptProject.Services
-{
+namespace receiptProject.receiptProjectBackend.Services{
     public class ReceiptItem
     {
         public int ItemID { get; set; }
