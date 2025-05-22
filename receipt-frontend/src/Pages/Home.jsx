@@ -7,7 +7,7 @@ import QuickScan from "../Components/QuickScan";
 
 function Home() {
     return (
-        <Container fluid className="px-4 py-3 text-center" style={{ backgroundColor: '#f7f5f1' }}>
+        <Container fluid className="px-4 py-3 text-center" style={{ backgroundColor: '#f7f5f1', minHeight: '100vh' }}>
 
             <div className="mb-5"><QuickScan /></div>
             <div className="mb-5"><HomeMonthOverview /></div>
