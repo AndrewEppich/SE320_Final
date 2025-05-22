@@ -9,6 +9,7 @@ namespace receiptProject.receiptProjectBackend.Services
     {
         private readonly ImageAnnotatorClient _visionClient;
         private readonly ILogger<ReceiptImageProcessor> _logger;
+        private readonly List<IReceiptObserver> _observers = new List<IReceiptObserver>();
 
         public ReceiptImageProcessor(ILogger<ReceiptImageProcessor> logger, IConfiguration configuration)
         {
@@ -37,12 +38,41 @@ namespace receiptProject.receiptProjectBackend.Services
                 throw;
             }
         }
+        
+        public void AddObserver(IReceiptObserver observer)
+        {
+            _observers.Add(observer);
+        }
+
+        public void RemoveObserver(IReceiptObserver observer)
+        {
+            _observers.Remove(observer);
+        }
+
+        private void NotifyObservers(Receipt receipt)
+        {
+            foreach (var observer in _observers)
+            {
+                observer.OnReceiptProcessed(receipt);
+            }
+        }
+
+        private void NotifyError(string error)
+        {
+            foreach (var observer in _observers)
+            {
+                observer.OnReceiptError(error);
+            }
+        }
+        
 
         public async Task<Receipt> ProcessReceiptImage(Stream imageStream)
         {
             if (imageStream == null || imageStream.Length == 0)
             {
-                throw new ArgumentException("Image stream is empty or null");
+                var error = "Image stream is empty or null";
+                NotifyError(error);
+                throw new ArgumentException(error);
             }
 
             try
@@ -71,13 +101,20 @@ namespace receiptProject.receiptProjectBackend.Services
 
                 if (receipt.Amount == null && receipt.Vendor == null && receipt.PurchaseDate == null)
                 {
-                    _logger.LogWarning("Could not extract any receipt information from the text");
+                    var error = "Could not extract any receipt information from the text";
+                    NotifyError(error);
+                    _logger.LogWarning(error);
+                }
+                else
+                {
+                    NotifyObservers(receipt);
                 }
 
                 return receipt;
             }
             catch (Exception ex)
             {
+                NotifyError(ex.Message);
                 _logger.LogError(ex, "Error processing receipt image");
                 throw;
             }
@@ -165,4 +202,6 @@ namespace receiptProject.receiptProjectBackend.Services
             return null;
         }
     }
+    
+    
 } 
