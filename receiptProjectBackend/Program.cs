@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using receiptProject.receiptProjectBackend.Data;
 using receiptProject.receiptProjectBackend.Services;
+using Google.Cloud.Vision.V1;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,7 @@ builder.Services.AddSwaggerGen();
 
 // var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 // Console.WriteLine($"DEBUG: Connection string being used: {connectionString}");
-var connectionString = "Server=localhost;Database=ReceiptProject;User=root;Password=540770;Port=3306;AllowPublicKeyRetrieval=true;SslMode=none;";
+var connectionString = "Server=localhost;Database=ReceiptProject;User=root;Password=CPSC40801;Port=3306;AllowPublicKeyRetrieval=true;SslMode=none;";
 Console.WriteLine($"DEBUG: Connection string being used: {connectionString}");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
@@ -23,6 +24,10 @@ builder.Services.AddScoped<WeeklySummaryFilter>();
 builder.Services.AddScoped<MonthlySummaryFilter>();
 builder.Services.AddScoped<VendorFilter>();
 builder.Services.AddScoped<ReceiptImageProcessor>();
+builder.Services.AddSingleton(provider =>
+{
+    return ImageAnnotatorClient.Create();
+});
 
 
 builder.Services.AddCors(options =>
