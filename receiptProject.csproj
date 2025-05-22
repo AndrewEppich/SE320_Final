@@ -16,6 +16,12 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageReference Include="Google.Cloud.Vision.V1" Version="3.3.0" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.6.0"/>
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.0"/>
+  </ItemGroup>
 
   <ItemGroup>
     <None Update="se320final-e34939b6ee16.json">
