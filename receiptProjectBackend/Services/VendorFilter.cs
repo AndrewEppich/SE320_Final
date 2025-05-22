@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using receiptProject.Data;
+using receiptProject.receiptProjectBackend.Data;
 using System.Linq;
 
 namespace receiptProject.Services

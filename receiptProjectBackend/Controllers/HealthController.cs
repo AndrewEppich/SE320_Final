@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using receiptProject.Data;
+using receiptProject.receiptProjectBackend.Data;
 
 namespace receiptProject.receiptProjectBackend.Controllers
 {
