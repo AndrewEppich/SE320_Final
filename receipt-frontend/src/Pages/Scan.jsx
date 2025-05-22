@@ -8,6 +8,12 @@ function Scan() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [currentReceipt, setCurrentReceipt] = useState(null);
+  const [manualValues, setManualValues] = useState({
+    vendor: '',
+    amount: '',
+    purchaseDate: ''
+  });
   const fileInputRef = useRef(null);
 
   const handleFileSelect = (event) => {
@@ -34,8 +40,58 @@ function Scan() {
     setSelectedFile(null);
     setPreview(null);
     setError(null);
+    setCurrentReceipt(null);
+    setManualValues({
+      vendor: '',
+      amount: '',
+      purchaseDate: ''
+    });
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  const handleManualValueChange = (e) => {
+    const { name, value } = e.target;
+    setManualValues(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleManualUpdate = async () => {
+    if (!currentReceipt) {
+      setError('No receipt to update');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/Receipts/${currentReceipt.receiptID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...currentReceipt,
+          vendor: manualValues.vendor,
+          amount: parseFloat(manualValues.amount),
+          purchaseDate: new Date(manualValues.purchaseDate).toISOString()
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update receipt');
+      }
+
+      setSuccess('Receipt updated successfully!');
+      clearForm();
+    } catch (err) {
+      setError(err.message || 'Failed to update receipt');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,8 +120,13 @@ function Scan() {
       }
 
       const data = await response.json();
-      setSuccess('Receipt uploaded successfully!');
-      clearForm();
+      setCurrentReceipt(data);
+      setManualValues({
+        vendor: data.vendor || '',
+        amount: data.amount?.toString() || '',
+        purchaseDate: data.purchaseDate ? new Date(data.purchaseDate).toISOString().split('T')[0] : ''
+      });
+      setSuccess('Receipt uploaded successfully! You can now manually adjust the values if needed.');
       
     } catch (err) {
       setError(err.message || 'Failed to upload receipt');
@@ -100,6 +161,57 @@ function Scan() {
                   style={{ maxWidth: '100%', maxHeight: '300px' }}
                   className="img-thumbnail"
                 />
+              </div>
+            )}
+
+            {currentReceipt && (
+              <div className="mb-3">
+                <h4>Manual Override</h4>
+                <Form.Group className="mb-3">
+                  <Form.Label>Vendor</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="vendor"
+                    value={manualValues.vendor}
+                    onChange={handleManualValueChange}
+                    placeholder="Enter vendor name"
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Amount</Form.Label>
+                  <Form.Control
+                    type="number"
+                    step="0.01"
+                    name="amount"
+                    value={manualValues.amount}
+                    onChange={handleManualValueChange}
+                    placeholder="Enter amount"
+                  />
+                </Form.Group>
+
+                <Form.Group className="mb-3">
+                  <Form.Label>Purchase Date</Form.Label>
+                  <Form.Control
+                    type="date"
+                    name="purchaseDate"
+                    value={manualValues.purchaseDate}
+                    onChange={handleManualValueChange}
+                  />
+                </Form.Group>
+
+                <Button
+                  variant="primary"
+                  onClick={handleManualUpdate}
+                  disabled={loading}
+                  className="w-100 mb-3"
+                  style={{
+                    backgroundColor: '#6f42c1',
+                    borderColor: '#6f42c1'
+                  }}
+                >
+                  {loading ? 'Updating...' : 'Update Receipt'}
+                </Button>
               </div>
             )}
 
