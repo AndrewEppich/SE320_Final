@@ -54,11 +54,7 @@ function History() {
                     <hr />
                     <p className="mb-0">
                         Please make sure:
-                        <ul>
-                            <li>The backend server is running</li>
-                            <li>You can access the Swagger UI at https://localhost:7096/swagger</li>
-                            <li>There are no CORS issues in the browser console</li>
-                        </ul>
+                        backend is running
                     </p>
                 </Alert>
             </Container>

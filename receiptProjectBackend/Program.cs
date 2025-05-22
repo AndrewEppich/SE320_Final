@@ -10,7 +10,10 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// Console.WriteLine($"DEBUG: Connection string being used: {connectionString}");
+var connectionString = "Server=localhost;Database=ReceiptProject;User=root;Password=540770;Port=3306;AllowPublicKeyRetrieval=true;SslMode=none;";
+Console.WriteLine($"DEBUG: Connection string being used: {connectionString}");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
@@ -29,7 +32,7 @@ builder.Services.AddCors(options =>
         {
            // Option 1: Allow specific origin with credentials
            policy
-                .WithOrigins("http://localhost:3000")
+                .WithOrigins("http://localhost:5173")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -45,15 +48,15 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 
-if (app.Environment.IsDevelopment())
-{
+// if (app.Environment.IsDevelopment())
+// {
     app.UseSwagger();
     app.UseSwaggerUI();
-}
+// }
 
 app.UseCors("ReactAppPolicy");
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 
 app.UseAuthorization();

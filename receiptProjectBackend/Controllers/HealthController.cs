@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using receiptProject.Data;
 
-namespace receiptProject.Controllers
+namespace receiptProject.receiptProjectBackend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

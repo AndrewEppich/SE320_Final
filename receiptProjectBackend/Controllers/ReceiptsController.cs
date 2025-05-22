@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using receiptProject.Services;
 using System.Linq;
 
-namespace receiptProject.receiptProject.Controllers
+namespace receiptProject.receiptProjectBackend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -41,6 +41,9 @@ namespace receiptProject.receiptProject.Controllers
                         "date" => sortOrder.ToLower() == "desc"
                             ? receipts.OrderByDescending(r => r.PurchaseDate)
                             : receipts.OrderBy(r => r.PurchaseDate),
+                        "vendor" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.Vendor)
+                            : receipts.OrderBy(r => r.Vendor),
                         _ => receipts
                     };
                 }
@@ -76,6 +79,9 @@ namespace receiptProject.receiptProject.Controllers
                         "date" => sortOrder.ToLower() == "desc"
                             ? receipts.OrderByDescending(r => r.PurchaseDate)
                             : receipts.OrderBy(r => r.PurchaseDate),
+                        "vendor" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.Vendor)
+                            : receipts.OrderBy(r => r.Vendor),
                         _ => receipts
                     };
                 }
@@ -111,6 +117,9 @@ namespace receiptProject.receiptProject.Controllers
                         "date" => sortOrder.ToLower() == "desc"
                             ? receipts.OrderByDescending(r => r.PurchaseDate)
                             : receipts.OrderBy(r => r.PurchaseDate),
+                        "vendor" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.Vendor)
+                            : receipts.OrderBy(r => r.Vendor),
                         _ => receipts
                     };
                 }
@@ -145,6 +154,9 @@ namespace receiptProject.receiptProject.Controllers
                         "date" => sortOrder.ToLower() == "desc"
                             ? receipts.OrderByDescending(r => r.PurchaseDate)
                             : receipts.OrderBy(r => r.PurchaseDate),
+                        "vendor" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.Vendor)
+                            : receipts.OrderBy(r => r.Vendor),
                         _ => receipts
                     };
                 }
