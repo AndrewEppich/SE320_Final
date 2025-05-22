@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using receiptProject.Services;
 
-namespace receiptProject.Data
+namespace receiptProject.receiptProjectBackend.Data
 {
     public class AppDbContext : DbContext
     {
