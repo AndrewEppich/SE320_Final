@@ -29,7 +29,7 @@ namespace receiptProject.receiptProjectBackend.Data
                 logger.LogInformation("Initializing database with SQL script");
 
                 var connectionString =
-                    "Server=localhost;Database=ReceiptProject;User=root;Password=CPSC40801;Port=3306;AllowPublicKeyRetrieval=true;SslMode=none;";
+                    "Server=localhost;Database=ReceiptProject;User=root;Password=540770;Port=3306;AllowPublicKeyRetrieval=true;SslMode=none;";
                 if (string.IsNullOrEmpty(connectionString))
                 {
                     throw new InvalidOperationException("Database connection string is not configured.");
