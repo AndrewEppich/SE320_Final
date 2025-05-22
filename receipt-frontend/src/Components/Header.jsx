@@ -42,7 +42,7 @@ function Header() {
                             History
                         </Nav.Link>
                     </Nav>
-                    <Nav className='justify-content-end'>
+                    {/* <Nav className='justify-content-end'>
                         <Nav.Link
                             as={NavLink}
                             to="/Login"
@@ -57,7 +57,7 @@ function Header() {
                         >
                             Register
                         </Nav.Link>
-                    </Nav>
+                    </Nav> */}
                 </Navbar.Collapse>
             </Container>
         </Navbar>
