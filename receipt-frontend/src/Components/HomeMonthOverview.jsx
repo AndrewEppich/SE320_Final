@@ -53,12 +53,11 @@ function HomeMonthOverview() {
         );
     }
 
-    // Get top vendor from vendorTotals with proper null checks
     const topVendor = monthlyData?.vendorTotals?.[0]
         ? `${monthlyData.vendorTotals[0].vendor} ($${(monthlyData.vendorTotals[0].total || 0).toFixed(2)})`
         : 'No data';
 
-    // Calculate spending by category from metadata with null checks
+
     const categorySpending = monthlyData?.receipts?.reduce((acc, receipt) => {
         if (!receipt) return acc;
         const category = receipt.metadataJson?.category || 'Uncategorized';

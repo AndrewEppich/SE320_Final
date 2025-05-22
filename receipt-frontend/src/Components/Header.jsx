@@ -7,8 +7,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 function Header() {
     return (
         <Navbar bg="primary" variant="dark" expand="lg" style={{ "--bs-primary-rgb": "111, 66, 193" }} >
-            <Container>
-                <Navbar.Brand as={NavLink} to="/">Receipt Scanner</Navbar.Brand>
+            <Container fluid>
+                <Navbar.Brand as={NavLink} to="/" style={{ marginLeft: '1rem' }}>Receipt Scanner</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="justify-content-center flex-grow-1">
