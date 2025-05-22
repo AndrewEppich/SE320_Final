@@ -8,8 +8,8 @@ namespace receiptProject.receiptProjectBackend.Services{
         public string? Vendor { get; set; }
         public decimal? Amount { get; set; }
         public DateTime? PurchaseDate { get; set; }
-        public string? ImagePath { get; set; }
-        public string? MetadataJson { get; set; }
+        //public string? ImagePath { get; set; }
+        //public string? MetadataJson { get; set; }
 
 
         [JsonIgnore]

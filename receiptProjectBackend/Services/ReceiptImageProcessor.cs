@@ -12,6 +12,7 @@ namespace receiptProject.receiptProjectBackend.Services
 
         public ReceiptImageProcessor(ILogger<ReceiptImageProcessor> logger, IConfiguration configuration)
         {
+            _logger = logger;
             try
             {
 
@@ -21,11 +22,14 @@ namespace receiptProject.receiptProjectBackend.Services
                 {
                     throw new InvalidOperationException("Google Cloud credentials not found in configuration");
                 }
+                
+                Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialsJson);
+
+                _visionClient = ImageAnnotatorClient.Create();
 
                 var tempPath = Path.GetTempFileName();
                 File.WriteAllText(tempPath, credentialsJson);
                 
-                _logger = logger;
             }
             catch (Exception ex)
             {
@@ -63,7 +67,6 @@ namespace receiptProject.receiptProjectBackend.Services
                     PurchaseDate = ExtractDate(fullText),
                     Amount = ExtractAmount(fullText),
                     Vendor = ExtractVendor(fullText),
-                    MetadataJson = fullText
                 };
 
                 if (receipt.Amount == null && receipt.Vendor == null && receipt.PurchaseDate == null)
@@ -108,11 +111,16 @@ namespace receiptProject.receiptProjectBackend.Services
         {
             var totalPatterns = new[]
             {
-                @"TOTAL\s*\$?\s*(\d+\.\d{2})",
-                @"TOTAL\s*DUE\s*\$?\s*(\d+\.\d{2})",
-                @"AMOUNT\s*DUE\s*\$?\s*(\d+\.\d{2})",
-                @"\$?\s*(\d+\.\d{2})\s*TOTAL",
-                @"\$?\s*(\d+\.\d{2})\s*$"
+                @"TOTAL\s*PURCHASE\s*\n\s*\$?\s*(\d+\.\d{2})",
+                @"TOTAL\s*PURCHASE[\s\n]*\$?\s*(\d+\.\d{2})",
+                @"TOTAL\s*\n\s*\$?\s*(\d+\.\d{2})",
+                @"GRAND\s*TOTAL\s*\n\s*\$?\s*(\d+\.\d{2})",
+                @"FINAL\s*TOTAL\s*\n\s*\$?\s*(\d+\.\d{2})",
+                @"AMOUNT\s*DUE\s*\n\s*\$?\s*(\d+\.\d{2})",
+                @"BALANCE\s*DUE\s*\n\s*\$?\s*(\d+\.\d{2})",
+                @"TOTAL\s*PURCHASE[\s\n]*\$?\s*(\d+\.\d{2})",
+                @"TOTAL[\s\n]+\$?\s*(\d+\.\d{2})",
+                @"GRAND\s*TOTAL[\s\n]+\$?\s*(\d+\.\d{2})",
             };
 
             foreach (var pattern in totalPatterns)
@@ -124,6 +132,15 @@ namespace receiptProject.receiptProjectBackend.Services
                     {
                         return amount;
                     }
+                }
+            }
+            
+            foreach (var pattern in totalPatterns)
+            {
+                var match = Regex.Match(text, pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+                if (match.Success && decimal.TryParse(match.Groups[1].Value, out decimal amount))
+                {
+                    return amount;
                 }
             }
 

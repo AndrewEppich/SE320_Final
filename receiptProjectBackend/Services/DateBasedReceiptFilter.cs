@@ -30,13 +30,7 @@ namespace receiptProject.receiptProjectBackend.Services{
                         UserID = dateReader.GetInt32("userID"),
                         Vendor = dateReader.GetString("vendor"),
                         Amount = dateReader.GetDecimal("amount"),
-                        PurchaseDate = dateReader.GetDateTime("purchaseDate"),
-                        ImagePath = dateReader.IsDBNull(dateReader.GetOrdinal("imagePath")) 
-                            ? null 
-                            : dateReader.GetString("imagePath"),
-                        MetadataJson = dateReader.IsDBNull(dateReader.GetOrdinal("metadataJson")) 
-                            ? null 
-                            : dateReader.GetString("metadataJson")
+                        PurchaseDate = dateReader.GetDateTime("purchaseDate")
                     });
                 }
             }
