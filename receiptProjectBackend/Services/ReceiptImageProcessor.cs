@@ -160,29 +160,42 @@ namespace receiptProject.receiptProjectBackend.Services
                 @"GRAND\s*TOTAL[\s\n]+\$?\s*(\d+\.\d{2})",
             };
 
+            var allMatches = new List<Match>();
             foreach (var pattern in totalPatterns)
             {
-                var matches = Regex.Matches(text, pattern, RegexOptions.IgnoreCase);
-                foreach (Match match in matches)
+                var matches = Regex.Matches(text, pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+                allMatches.AddRange(matches.Cast<Match>());
+                //     foreach (Match match in matches)
+                //     {
+                //         if (decimal.TryParse(match.Groups[1].Value, out decimal amount))
+                //         {
+                //             return amount;
+                //         }
+                //     }
+                // }
+
+                // foreach (var pattern in totalPatterns)
+                // {
+                //     var match = Regex.Match(text, pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+                //     if (match.Success && decimal.TryParse(match.Groups[1].Value, out decimal amount))
+                //     {
+                //         return amount;
+                //     }
+                // }
+            }
+
+            if (allMatches.Any())
                 {
-                    if (decimal.TryParse(match.Groups[1].Value, out decimal amount))
+                    var lastMatch = allMatches.OrderBy(m => m.Index).Last();
+                    if (decimal.TryParse(lastMatch.Groups[1].Value, out decimal amount))
                     {
                         return amount;
                     }
                 }
-            }
-            
-            foreach (var pattern in totalPatterns)
-            {
-                var match = Regex.Match(text, pattern, RegexOptions.IgnoreCase | RegexOptions.Multiline);
-                if (match.Success && decimal.TryParse(match.Groups[1].Value, out decimal amount))
-                {
-                    return amount;
-                }
-            }
 
-            return null;
+                return null;
         }
+        
 
         private string? ExtractVendor(string text)
         {
