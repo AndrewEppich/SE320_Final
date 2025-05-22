@@ -22,6 +22,13 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="receiptProjectBackend\obj\Debug\net8.0\receiptProject.sourcelink.json" />
+    <_ContentIncludedByDefault Remove="receiptProjectBackend\obj\Debug\net8.0\staticwebassets.build.json" />
+    <_ContentIncludedByDefault Remove="receiptProjectBackend\obj\project.assets.json" />
+    <_ContentIncludedByDefault Remove="receiptProjectBackend\obj\receiptProject.csproj.nuget.dgspec.json" />
+  </ItemGroup>
   
 
 </Project>
