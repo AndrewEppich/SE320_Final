@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
-using receiptProject.Services;
+using receiptProject.receiptProjectBackend.Services;
 
-namespace receiptProject.Services
-{
+namespace receiptProject.receiptProjectBackend.Services{
     public class AmountBasedReceiptFilter
     {
         public List<Receipt> FilterByAmount(int minAmount, int maxAmount)

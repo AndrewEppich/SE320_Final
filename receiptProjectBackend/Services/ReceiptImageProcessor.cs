@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 
-namespace receiptProject.Services
+namespace receiptProject.receiptProjectBackend.Services
 {
     public class ReceiptImageProcessor
     {
@@ -15,7 +15,8 @@ namespace receiptProject.Services
             try
             {
 
-                var credentialsJson = configuration["GoogleCloudCredentials"];
+                var credentialsJson = Path.Combine(Directory.GetCurrentDirectory(), "receiptProjectBackend",
+                    "googleVisionKey.json");
                 if (string.IsNullOrEmpty(credentialsJson))
                 {
                     throw new InvalidOperationException("Google Cloud credentials not found in configuration");
@@ -24,24 +25,11 @@ namespace receiptProject.Services
                 var tempPath = Path.GetTempFileName();
                 File.WriteAllText(tempPath, credentialsJson);
                 
-                try
-                {
-                    Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", tempPath);
-                    _visionClient = ImageAnnotatorClient.Create();
-                }
-                finally
-                {
-                    if (File.Exists(tempPath))
-                    {
-                        File.Delete(tempPath);
-                    }
-                }
-                
                 _logger = logger;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to initialize Google Cloud Vision client");
+               logger.LogError(ex, "Failed to initialize Google Cloud Vision client");
                 throw;
             }
         }

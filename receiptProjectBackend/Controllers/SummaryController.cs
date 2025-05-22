@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using receiptProject.Services;
+using receiptProject.receiptProjectBackend.Services;
 
 namespace receiptProject.receiptProjectBackend.Controllers
 {

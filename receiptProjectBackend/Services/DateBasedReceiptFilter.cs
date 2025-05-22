@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
-using receiptProject.Services;
+using receiptProject.receiptProjectBackend.Services;
 
-namespace receiptProject.Services
-{
+namespace receiptProject.receiptProjectBackend.Services{
     public class DateBasedReceiptFilter
     {
         public List<Receipt> GetReceiptsByDateRange(DateTime startDate, DateTime endDate)

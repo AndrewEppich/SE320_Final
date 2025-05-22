@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using receiptProject.Services;
+using receiptProject.receiptProjectBackend.Services;
 using System.Linq;
 
 namespace receiptProject.receiptProjectBackend.Controllers

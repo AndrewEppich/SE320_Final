@@ -5,8 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using receiptProject.receiptProjectBackend.Data;
 using System.Linq;
 
-namespace receiptProject.Services
-{
+namespace receiptProject.receiptProjectBackend.Services{
     public class VendorFilter
     {
         private readonly AppDbContext _context;

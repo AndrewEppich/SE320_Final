@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace receiptProject.Services
-{
+namespace receiptProject.receiptProjectBackend.Services{
     public interface IReceiptRepository
     {
         Task<IEnumerable<Receipt>> GetAllReceiptsAsync(int userId);

@@ -6,8 +6,7 @@ using receiptProject.receiptProjectBackend.Data;
 using System.Linq;
 using System.Text.Json;
 
-namespace receiptProject.Services
-{
+namespace receiptProject.receiptProjectBackend.Services{
     public class WeeklySummaryFilter
     {
         private readonly AppDbContext _context;
