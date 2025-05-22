@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Container, Card, ListGroup, Alert, Spinner, Button, ButtonGroup, Pagination } from 'react-bootstrap';
+import { Container, Card, Alert, Spinner, Button, ButtonGroup, Pagination } from 'react-bootstrap';
 import { api } from '../services/api';
+import { ListViewStrategy } from '../strategies/ListViewStrategy.jsx';
+import { GridViewStrategy } from '../strategies/GridViewStrategy.jsx';
 
 function History() {
     const [receipts, setReceipts] = useState([]);
@@ -8,6 +10,7 @@ function History() {
     const [error, setError] = useState(null);
     const [sortConfig, setSortConfig] = useState({ field: null, order: 'asc' });
     const [currentPage, setCurrentPage] = useState(1);
+    const [viewStrategy, setViewStrategy] = useState(new ListViewStrategy());
     const receiptsPerPage = 8;
 
     useEffect(() => {
@@ -18,9 +21,7 @@ function History() {
         try {
             setLoading(true);
             setError(null);
-            console.log('Fetching receipts...');
             const data = await api.getReceipts(sortConfig.field, sortConfig.order);
-            console.log('Received data:', data);
             setReceipts(data);
         } catch (err) {
             console.error('Error in History component:', err);
@@ -35,6 +36,10 @@ function History() {
             field,
             order: prevConfig.field === field && prevConfig.order === 'asc' ? 'desc' : 'asc'
         }));
+    };
+
+    const handleViewChange = (viewType) => {
+        setViewStrategy(viewType === 'list' ? new ListViewStrategy() : new GridViewStrategy());
     };
 
     // Calculate pagination
@@ -64,10 +69,7 @@ function History() {
                     <Alert.Heading>Error Loading Receipts</Alert.Heading>
                     <p>{error}</p>
                     <hr />
-                    <p className="mb-0">
-                        Please make sure:
-                        backend is running
-                    </p>
+                    <p className="mb-0">Please make sure backend is running</p>
                 </Alert>
             </Container>
         );
@@ -76,7 +78,7 @@ function History() {
     return (
         <Container className="py-4">
             <h1>Receipt History</h1>
-            <div className="mb-3">
+            <div className="mb-3 d-flex justify-content-between align-items-center">
                 <ButtonGroup>
                     <Button 
                         variant={sortConfig.field === 'date' ? 'primary' : 'outline-primary'}
@@ -97,28 +99,33 @@ function History() {
                         Sort by Vendor {sortConfig.field === 'vendor' && (sortConfig.order === 'asc' ? '↑' : '↓')}
                     </Button>
                 </ButtonGroup>
+
+                <ButtonGroup>
+                    <Button
+                        variant={viewStrategy instanceof ListViewStrategy ? 'primary' : 'outline-primary'}
+                        onClick={() => handleViewChange('list')}
+                    >
+                        List View
+                    </Button>
+                    <Button
+                        variant={viewStrategy instanceof GridViewStrategy ? 'primary' : 'outline-primary'}
+                        onClick={() => handleViewChange('grid')}
+                    >
+                        Grid View
+                    </Button>
+                </ButtonGroup>
             </div>
+
             {receipts.length === 0 ? (
                 <Alert variant="info">No receipts found.</Alert>
             ) : (
                 <>
                     <Card className="mb-3">
-                        <ListGroup variant="flush">
-                            {currentReceipts.map(receipt => (
-                                <ListGroup.Item key={receipt.receiptID} className="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h5>{receipt.vendor}</h5>
-                                        <small className="text-muted">
-                                            {new Date(receipt.purchaseDate).toLocaleDateString()}
-                                        </small>
-                                    </div>
-                                    <span>${receipt.amount}</span>
-                                </ListGroup.Item>
-                            ))}
-                        </ListGroup>
+                        <Card.Body>
+                            {viewStrategy.render(currentReceipts)}
+                        </Card.Body>
                     </Card>
 
-                    {/* Pagination */}
                     {receipts.length > receiptsPerPage && (
                         <div className="d-flex justify-content-center">
                             <Pagination>
