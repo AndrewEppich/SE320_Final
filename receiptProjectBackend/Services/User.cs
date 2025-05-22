@@ -10,8 +10,5 @@ namespace receiptProject.receiptProjectBackend.Services{
 
         [JsonIgnore]
         public List<Receipt> Receipts { get; set; } = new List<Receipt>();
-        
-        [JsonIgnore]
-        public List<Summary> Summaries { get; set; } = new List<Summary>();
     }
 } 

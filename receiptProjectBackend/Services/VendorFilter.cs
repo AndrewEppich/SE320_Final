@@ -35,19 +35,8 @@ namespace receiptProject.receiptProjectBackend.Services{
                 .ToListAsync();
         }
 
-        public async Task<Summary> GetVendorSummary(int userId, string vendorName)
+        public async Task<object> GetVendorSummary(int userId, string vendorName)
         {
-            var existingSummary = await _context.Summaries
-                .FirstOrDefaultAsync(s => s.UserID == userId && 
-                                         s.SummaryType == "vendor" && 
-                                         s.DataJson != null && 
-                                         s.DataJson.Contains(vendorName));
-
-            if (existingSummary != null)
-            {
-                return existingSummary;
-            }
-
             var receipts = await GetReceiptsByVendor(userId, vendorName, true);
 
             if (!receipts.Any())
@@ -62,8 +51,7 @@ namespace receiptProject.receiptProjectBackend.Services{
 
             var monthlyTotals = receipts
                 .GroupBy(r => new { r.PurchaseDate?.Year, r.PurchaseDate?.Month })
-                .Select(g => new
-                {
+                .Select(g => new {
                     Year = g.Key.Year,
                     Month = g.Key.Month,
                     Total = g.Sum(r => r.Amount ?? 0),
@@ -73,29 +61,13 @@ namespace receiptProject.receiptProjectBackend.Services{
                 .ThenBy(g => g.Month)
                 .ToList();
 
-            var summaryData = System.Text.Json.JsonSerializer.Serialize(new
-            {
+            return new {
                 vendor = vendorName,
                 totalReceipts = receipts.Count,
                 totalSpent,
                 monthlyTotals,
                 receipts
-            });
-
-            var summary = new Summary
-            {
-                UserID = userId,
-                SummaryType = "vendor",
-                StartDate = startDate,
-                EndDate = endDate,
-                TotalSpent = totalSpent,
-                DataJson = summaryData
             };
-
-            _context.Summaries.Add(summary);
-            await _context.SaveChangesAsync();
-
-            return summary;
         }
 
         public async Task<List<string>> GetAllVendors(int userId)
