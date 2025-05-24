@@ -54,6 +54,34 @@ function History() {
 
     if (loading) {
         return (
+
+            <div className="filters" style={{ marginBottom: '20px' }}>
+                <h3>Filter Receipts</h3>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <div>
+                        <label>Start Date:</label>
+                        <input type="date" />
+                    </div>
+                    <div>
+                        <label>End Date:</label>
+                        <input type="date" />
+                    </div>
+                    <div>
+                        <label>Min Amount:</label>
+                        <input type="number" step="0.01" />
+                    </div>
+                    <div>
+                        <label>Max Amount:</label>
+                        <input type="number" step="0.01" />
+                    </div>
+                    <div>
+                        <label>Vendor:</label>
+                        <input type="text" placeholder="e.g. Amazon" />
+                    </div>
+                    <button>Apply Filters</button>
+                </div>
+            </div>
+
             <Container className="py-4 text-center">
                 <Spinner animation="border" role="status">
                     <span className="visually-hidden">Loading...</span>
@@ -64,6 +92,34 @@ function History() {
 
     if (error) {
         return (
+
+            <div className="filters" style={{ marginBottom: '20px' }}>
+                <h3>Filter Receipts</h3>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <div>
+                        <label>Start Date:</label>
+                        <input type="date" />
+                    </div>
+                    <div>
+                        <label>End Date:</label>
+                        <input type="date" />
+                    </div>
+                    <div>
+                        <label>Min Amount:</label>
+                        <input type="number" step="0.01" />
+                    </div>
+                    <div>
+                        <label>Max Amount:</label>
+                        <input type="number" step="0.01" />
+                    </div>
+                    <div>
+                        <label>Vendor:</label>
+                        <input type="text" placeholder="e.g. Amazon" />
+                    </div>
+                    <button>Apply Filters</button>
+                </div>
+            </div>
+
             <Container className="py-4">
                 <Alert variant="danger">
                     <Alert.Heading>Error Loading Receipts</Alert.Heading>
@@ -76,6 +132,34 @@ function History() {
     }
 
     return (
+
+            <div className="filters" style={{ marginBottom: '20px' }}>
+                <h3>Filter Receipts</h3>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <div>
+                        <label>Start Date:</label>
+                        <input type="date" />
+                    </div>
+                    <div>
+                        <label>End Date:</label>
+                        <input type="date" />
+                    </div>
+                    <div>
+                        <label>Min Amount:</label>
+                        <input type="number" step="0.01" />
+                    </div>
+                    <div>
+                        <label>Max Amount:</label>
+                        <input type="number" step="0.01" />
+                    </div>
+                    <div>
+                        <label>Vendor:</label>
+                        <input type="text" placeholder="e.g. Amazon" />
+                    </div>
+                    <button>Apply Filters</button>
+                </div>
+            </div>
+
         <Container className="py-4">
             <h1>Receipt History</h1>
             <div className="mb-3 d-flex justify-content-between align-items-center">
