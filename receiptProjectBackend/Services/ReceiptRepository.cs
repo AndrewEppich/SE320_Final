@@ -1,100 +1,110 @@
-using Microsoft.EntityFrameworkCore;
-using receiptProject.receiptProjectBackend.Data;
+using System.Collections.Generic;
+using MySql.Data.MySqlClient;
 
-namespace receiptProject.receiptProjectBackend.Services{
+namespace receiptProject.receiptProjectBackend.Services
+{
+    /// <summary>
+    /// Handles db for receipts
+    /// </summary>
     public class ReceiptRepository : IReceiptRepository
     {
-        private readonly AppDbContext _context;
+        private const string ConnectionString = "Server=localhost;Database=ReceiptProject;User=root;Password=540770;Port=3306;";
 
-        public ReceiptRepository(AppDbContext context)
+        public List<Receipt> GetAllReceipts()
         {
-            _context = context;
-        }
+            var receipts = new List<Receipt>();
 
-        public async Task<IEnumerable<Receipt>> GetAllReceiptsAsync(int userId)
-        {
-            return await _context.Receipts
-                .Where(r => r.UserID == userId)
-                .Include(r => r.Items)
-                .ToListAsync();
-        }
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
 
-        public async Task<Receipt?> GetReceiptByIdAsync(int receiptId, int userId)
-        {
-            return await _context.Receipts
-                .Where(r => r.ReceiptID == receiptId && r.UserID == userId)
-                .Include(r => r.Items)
-                .FirstOrDefaultAsync();
-        }
-
-        public async Task<Receipt> AddReceiptAsync(Receipt receipt)
-        {
-            _context.Receipts.Add(receipt);
-            await _context.SaveChangesAsync();
-            return receipt;
-        }
-
-        public async Task<bool> UpdateReceiptAsync(Receipt receipt)
-        {
-            _context.Entry(receipt).State = EntityState.Modified;
-            
-            try
+            using var command = new MySqlCommand("SELECT * FROM receipts", connection);
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
             {
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!await ReceiptExists(receipt.ReceiptID))
+                receipts.Add(new Receipt
                 {
-                    return false;
-                }
-                throw;
+                    ReceiptID = reader.GetInt32("receiptID"),
+                    UserID = reader.GetInt32("userID"),
+                    Vendor = reader.GetString("vendor"),
+                    Amount = reader.GetDecimal("amount"),
+                    PurchaseDate = reader.GetDateTime("purchaseDate")
+                });
             }
+
+            return receipts;
         }
 
-        public async Task<bool> DeleteReceiptAsync(int receiptId, int userId)
+        public Receipt GetReceiptById(int id)
         {
-            var receipt = await _context.Receipts
-                .FirstOrDefaultAsync(r => r.ReceiptID == receiptId && r.UserID == userId);
-                
-            if (receipt == null)
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
+
+            const string query = "SELECT * FROM receipts WHERE receiptID = @id";
+            using var command = new MySqlCommand(query, connection);
+            command.Parameters.AddWithValue("@id", id);
+
+            using var reader = command.ExecuteReader();
+            if (reader.Read())
             {
-                return false;
+                return new Receipt
+                {
+                    ReceiptID = reader.GetInt32("receiptID"),
+                    UserID = reader.GetInt32("userID"),
+                    Vendor = reader.GetString("vendor"),
+                    Amount = reader.GetDecimal("amount"),
+                    PurchaseDate = reader.GetDateTime("purchaseDate")
+                };
             }
 
-            _context.Receipts.Remove(receipt);
-            await _context.SaveChangesAsync();
-            return true;
+            return null;
         }
 
-        private async Task<bool> ReceiptExists(int receiptId)
+        public void AddReceipt(Receipt receipt)
         {
-            return await _context.Receipts.AnyAsync(r => r.ReceiptID == receiptId);
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
+
+            const string query = @"
+                INSERT INTO receipts (userID, vendor, amount, purchaseDate) 
+                VALUES (@userID, @vendor, @amount, @purchaseDate)";
+            using var command = new MySqlCommand(query, connection);
+            command.Parameters.AddWithValue("@userID", receipt.UserID);
+            command.Parameters.AddWithValue("@vendor", receipt.Vendor);
+            command.Parameters.AddWithValue("@amount", receipt.Amount);
+            command.Parameters.AddWithValue("@purchaseDate", receipt.PurchaseDate);
+
+            command.ExecuteNonQuery();
         }
 
-        public async Task<IEnumerable<Receipt>> GetReceiptsByDateRangeAsync(int userId, DateTime startDate, DateTime endDate)
+        public void UpdateReceipt(Receipt receipt)
         {
-            return await _context.Receipts
-                .Where(r => r.UserID == userId && r.PurchaseDate >= startDate && r.PurchaseDate <= endDate)
-                .Include(r => r.Items)
-                .ToListAsync();
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
+
+            const string query = @"
+                UPDATE receipts 
+                SET userID = @userID, vendor = @vendor, amount = @amount, purchaseDate = @purchaseDate 
+                WHERE receiptID = @receiptID";
+            using var command = new MySqlCommand(query, connection);
+            command.Parameters.AddWithValue("@userID", receipt.UserID);
+            command.Parameters.AddWithValue("@vendor", receipt.Vendor);
+            command.Parameters.AddWithValue("@amount", receipt.Amount);
+            command.Parameters.AddWithValue("@purchaseDate", receipt.PurchaseDate);
+            command.Parameters.AddWithValue("@receiptID", receipt.ReceiptID);
+
+            command.ExecuteNonQuery();
         }
 
-        public async Task<IEnumerable<Receipt>> GetReceiptsByAmountRangeAsync(int userId, decimal minAmount, decimal maxAmount)
+        public void DeleteReceipt(int id)
         {
-            return await _context.Receipts
-                .Where(r => r.UserID == userId && r.Amount >= minAmount && r.Amount <= maxAmount)
-                .Include(r => r.Items)
-                .ToListAsync();
-        }
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
 
-        public async Task<IEnumerable<Receipt>> GetReceiptsByVendorAsync(int userId, string vendor)
-        {
-            return await _context.Receipts
-                .Where(r => r.UserID == userId && r.Vendor != null && r.Vendor.ToLower().Contains(vendor.ToLower()))
-                .Include(r => r.Items)
-                .ToListAsync();
+            const string query = "DELETE FROM receipts WHERE receiptID = @id";
+            using var command = new MySqlCommand(query, connection);
+            command.Parameters.AddWithValue("@id", id);
+
+            command.ExecuteNonQuery();
         }
     }
-} 
+}
