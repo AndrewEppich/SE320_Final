@@ -1,41 +1,50 @@
 using System;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
-using receiptProject.receiptProjectBackend.Services;
 
-namespace receiptProject.receiptProjectBackend.Services{
+namespace receiptProject.receiptProjectBackend.Services
+{
+    /// <summary>
+    /// Filters receipts based on a date range
+    /// </summary>
     public class DateBasedReceiptFilter
     {
-        public List<Receipt> GetReceiptsByDateRange(DateTime startDate, DateTime endDate)
-        {
-            var receiptsByDate = new List<Receipt>();
-            
-            string connectionString = "Server=localhost;Database=ReceiptProject;User=root;Password=540770;Port=3306;";
-            
-            using (var conn = new MySqlConnection(connectionString))
-            {
-                conn.Open();
-                var dateQuery = new MySqlCommand(
-                    "SELECT * FROM receipts INNER JOIN user u ON receipts.userID = u.userID WHERE purchaseDate BETWEEN @startDate AND @endDate ORDER BY purchaseDate", 
-                    conn);
-                dateQuery.Parameters.AddWithValue("@startDate", startDate);
-                dateQuery.Parameters.AddWithValue("@endDate", endDate);
+        private const string ConnectionString = "Server=localhost;Database=ReceiptProject;User=root;Password=540770;Port=3306;";
 
-                var dateReader = dateQuery.ExecuteReader();
-                while (dateReader.Read())
+        /// <summary>
+        /// Retrieves receipts between the said start and end dates
+        /// </summary>
+        public List<Receipt> FilterByDateRange(DateTime startDate, DateTime endDate)
+        {
+            var receipts = new List<Receipt>();
+
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
+
+            const string query = @"
+                SELECT * 
+                FROM receipts 
+                WHERE purchaseDate BETWEEN @startDate AND @endDate 
+                ORDER BY purchaseDate";
+
+            using var command = new MySqlCommand(query, connection);
+            command.Parameters.AddWithValue("@startDate", startDate);
+            command.Parameters.AddWithValue("@endDate", endDate);
+
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                receipts.Add(new Receipt
                 {
-                    receiptsByDate.Add(new Receipt
-                    {
-                        ReceiptID = dateReader.GetInt32("receiptID"),
-                        UserID = dateReader.GetInt32("userID"),
-                        Vendor = dateReader.GetString("vendor"),
-                        Amount = dateReader.GetDecimal("amount"),
-                        PurchaseDate = dateReader.GetDateTime("purchaseDate")
-                    });
-                }
+                    ReceiptID = reader.GetInt32("receiptID"),
+                    UserID = reader.GetInt32("userID"),
+                    Vendor = reader.GetString("vendor"),
+                    Amount = reader.GetDecimal("amount"),
+                    PurchaseDate = reader.GetDateTime("purchaseDate")
+                });
             }
 
-            return receiptsByDate;
+            return receipts;
         }
     }
 }
