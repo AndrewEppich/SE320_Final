@@ -1,60 +1,314 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+using receiptProject.receiptProjectBackend.Services;
+using System.Linq;
 
 namespace receiptProject.receiptProjectBackend.Controllers
 {
-    /// Handles receipt related api endpoints
     [ApiController]
     [Route("api/[controller]")]
     public class ReceiptsController : ControllerBase
     {
         private readonly IReceiptRepository _repository;
+        private readonly ILogger<ReceiptsController> _logger;
+        private readonly ReceiptImageProcessor _imageProcessor;
 
-        public ReceiptsController(IReceiptRepository repository)
+        public ReceiptsController(
+            IReceiptRepository repository, 
+            ILogger<ReceiptsController> logger,
+            ReceiptImageProcessor imageProcessor)
         {
             _repository = repository;
+            _logger = logger;
+            _imageProcessor = imageProcessor;
         }
 
-        /// Retrieves all receipts.
+
         [HttpGet]
-        public ActionResult<List<Receipt>> GetAll()
+        public async Task<ActionResult<IEnumerable<Receipt>>> GetReceipts([FromQuery] string? sortBy = null, [FromQuery] string? sortOrder = "asc")
         {
-            var receipts = _repository.GetAllReceipts();
-            return Ok(receipts);
+            try
+            {
+                int userId = 1;
+                var receipts = await _repository.GetAllReceiptsAsync(userId);
+
+                if (!string.IsNullOrEmpty(sortBy))
+                {
+                    receipts = sortBy.ToLower() switch
+                    {
+                        "amount" => sortOrder.ToLower() == "desc" 
+                            ? receipts.OrderByDescending(r => r.Amount)
+                            : receipts.OrderBy(r => r.Amount),
+                        "date" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.PurchaseDate)
+                            : receipts.OrderBy(r => r.PurchaseDate),
+                        "vendor" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.Vendor)
+                            : receipts.OrderBy(r => r.Vendor),
+                        _ => receipts
+                    };
+                }
+
+                return Ok(receipts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting receipts");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
-        /// Gets a single receipt by ID.
+        [HttpGet("date-range")]
+        public async Task<ActionResult<IEnumerable<Receipt>>> GetReceiptsByDateRange(
+            [FromQuery] DateTime startDate,
+            [FromQuery] DateTime endDate,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] string? sortOrder = "asc")
+        {
+            try
+            {
+                int userId = 1;
+                var receipts = await _repository.GetReceiptsByDateRangeAsync(userId, startDate, endDate);
+
+                if (!string.IsNullOrEmpty(sortBy))
+                {
+                    receipts = sortBy.ToLower() switch
+                    {
+                        "amount" => sortOrder.ToLower() == "desc" 
+                            ? receipts.OrderByDescending(r => r.Amount)
+                            : receipts.OrderBy(r => r.Amount),
+                        "date" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.PurchaseDate)
+                            : receipts.OrderBy(r => r.PurchaseDate),
+                        "vendor" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.Vendor)
+                            : receipts.OrderBy(r => r.Vendor),
+                        _ => receipts
+                    };
+                }
+
+                return Ok(receipts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting receipts by date range");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("amount-range")]
+        public async Task<ActionResult<IEnumerable<Receipt>>> GetReceiptsByAmountRange(
+            [FromQuery] decimal minAmount,
+            [FromQuery] decimal maxAmount,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] string? sortOrder = "asc")
+        {
+            try
+            {
+                int userId = 1;
+                var receipts = await _repository.GetReceiptsByAmountRangeAsync(userId, minAmount, maxAmount);
+
+                if (!string.IsNullOrEmpty(sortBy))
+                {
+                    receipts = sortBy.ToLower() switch
+                    {
+                        "amount" => sortOrder.ToLower() == "desc" 
+                            ? receipts.OrderByDescending(r => r.Amount)
+                            : receipts.OrderBy(r => r.Amount),
+                        "date" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.PurchaseDate)
+                            : receipts.OrderBy(r => r.PurchaseDate),
+                        "vendor" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.Vendor)
+                            : receipts.OrderBy(r => r.Vendor),
+                        _ => receipts
+                    };
+                }
+
+                return Ok(receipts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting receipts by amount range");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("vendor")]
+        public async Task<ActionResult<IEnumerable<Receipt>>> GetReceiptsByVendor(
+            [FromQuery] string vendor,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] string? sortOrder = "asc")
+        {
+            try
+            {
+                int userId = 1;
+                var receipts = await _repository.GetReceiptsByVendorAsync(userId, vendor);
+
+                if (!string.IsNullOrEmpty(sortBy))
+                {
+                    receipts = sortBy.ToLower() switch
+                    {
+                        "amount" => sortOrder.ToLower() == "desc" 
+                            ? receipts.OrderByDescending(r => r.Amount)
+                            : receipts.OrderBy(r => r.Amount),
+                        "date" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.PurchaseDate)
+                            : receipts.OrderBy(r => r.PurchaseDate),
+                        "vendor" => sortOrder.ToLower() == "desc"
+                            ? receipts.OrderByDescending(r => r.Vendor)
+                            : receipts.OrderBy(r => r.Vendor),
+                        _ => receipts
+                    };
+                }
+
+                return Ok(receipts);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting receipts by vendor");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
         [HttpGet("{id}")]
-        public ActionResult<Receipt> GetById(int id)
+        public async Task<ActionResult<Receipt>> GetReceipt(int id)
         {
-            var receipt = _repository.GetReceiptById(id);
-            if (receipt == null) return NotFound();
-            return Ok(receipt);
+            try
+            {
+
+                int userId = 1;
+                var receipt = await _repository.GetReceiptByIdAsync(id, userId);
+
+                if (receipt == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok(receipt);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting receipt {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
-        /// Adds a new receipt.
+
         [HttpPost]
-        public IActionResult Add([FromBody] Receipt receipt)
+        public async Task<ActionResult<Receipt>> PostReceipt(Receipt receipt)
         {
-            _repository.AddReceipt(receipt);
-            return CreatedAtAction(nameof(GetById), new { id = receipt.ReceiptID }, receipt);
+            try
+            {
+
+                receipt.UserID = 1;
+                
+                var createdReceipt = await _repository.AddReceiptAsync(receipt);
+                return CreatedAtAction(nameof(GetReceipt), new { id = createdReceipt.ReceiptID }, createdReceipt);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating receipt");
+                return StatusCode(500, "Internal server error");
+            }
         }
 
-        /// Updates an existing receipt
+
         [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] Receipt receipt)
+        public async Task<IActionResult> PutReceipt(int id, Receipt receipt)
         {
-            if (id != receipt.ReceiptID) return BadRequest();
-            _repository.UpdateReceipt(receipt);
-            return NoContent();
+            if (id != receipt.ReceiptID)
+            {
+                return BadRequest();
+            }
+
+            try
+            {
+
+                receipt.UserID = 1;
+                
+                bool success = await _repository.UpdateReceiptAsync(receipt);
+                if (!success)
+                {
+                    return NotFound();
+                }
+                
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating receipt {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
         }
 
-        /// Deletes a receipt by ID
+
         [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> DeleteReceipt(int id)
         {
-            _repository.DeleteReceipt(id);
-            return NoContent();
+            try
+            {
+
+                int userId = 1;
+                
+                bool success = await _repository.DeleteReceiptAsync(id, userId);
+                if (!success)
+                {
+                    return NotFound();
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting receipt {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpPost("scan")]
+        public async Task<ActionResult<Receipt>> ScanReceipt(IFormFile image)
+        {
+            try
+            {
+                if (image == null || image.Length == 0)
+                {
+                    return BadRequest("No image file provided");
+                }
+
+                var allowedTypes = new[] { "image/jpeg", "image/png", "image/gif" };
+                if (!allowedTypes.Contains(image.ContentType.ToLower()))
+                {
+                    return BadRequest("Invalid file type. Only JPEG, PNG, and GIF images are allowed.");
+                }
+
+                if (image.Length > 10 * 1024 * 1024)
+                {
+                    return BadRequest("File size too large. Maximum size is 10MB.");
+                }
+
+                using var stream = image.OpenReadStream();
+                var receipt = await _imageProcessor.ProcessReceiptImage(stream);
+
+                receipt.UserID = 1;
+
+                var createdReceipt = await _repository.AddReceiptAsync(receipt);
+                return CreatedAtAction(nameof(GetReceipt), new { id = createdReceipt.ReceiptID }, createdReceipt);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogWarning(ex, "Invalid image data provided");
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Failed to process receipt image");
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error scanning receipt image");
+                return StatusCode(500, "Error processing receipt image");
+            }
         }
     }
-}
+} 
