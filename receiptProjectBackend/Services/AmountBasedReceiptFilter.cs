@@ -1,41 +1,54 @@
 using System;
 using System.Collections.Generic;
 using MySql.Data.MySqlClient;
-using receiptProject.receiptProjectBackend.Services;
 
-namespace receiptProject.receiptProjectBackend.Services{
+namespace receiptProject.receiptProjectBackend.Services
+{
+    /// <summary>
+    /// Filters receipts based on their amount.
+    /// </summary>
     public class AmountBasedReceiptFilter
     {
+        private const string ConnectionString = "Server=localhost;Database=ReceiptProject;User=root;Password=540770;Port=3306;";
+
+        /// <summary>
+        /// Returns a list of receipts whose amount is between the specified minimum and maximum.
+        /// </summary>
+        /// <param name="minAmount">Minimum amount filter</param>
+        /// <param name="maxAmount">Maximum amount filter</param>
+        /// <returns>List of filtered receipts</returns>
         public List<Receipt> FilterByAmount(int minAmount, int maxAmount)
         {
-            var receiptsByAmount = new List<Receipt>();
+            var filteredReceipts = new List<Receipt>();
 
-            string connectionString = "Server=localhost;Database=ReceiptProject;User=root;Password=540770;Port=3306;";
-            
-            using (var conn = new MySqlConnection(connectionString))
+            using var connection = new MySqlConnection(ConnectionString);
+            connection.Open();
+
+            const string query = @"
+                SELECT * 
+                FROM receipts 
+                INNER JOIN user u ON receipts.userID = u.userID 
+                WHERE amount BETWEEN @minAmount AND @maxAmount 
+                ORDER BY purchaseDate";
+
+            using var command = new MySqlCommand(query, connection);
+            command.Parameters.AddWithValue("@minAmount", minAmount);
+            command.Parameters.AddWithValue("@maxAmount", maxAmount);
+
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
             {
-                conn.Open();
-                var amountQuery =
-                    new MySqlCommand(
-                        "SELECT * FROM receipts INNER JOIN user u ON receipts.userID = u.userID WHERE amount BETWEEN @minAmount AND @maxAmount ORDER BY purchaseDate",
-                        conn);
-                amountQuery.Parameters.AddWithValue("@minAmount", minAmount);
-                amountQuery.Parameters.AddWithValue("@maxAmount", maxAmount);
-
-                var amountReader = amountQuery.ExecuteReader();
-                while (amountReader.Read())
+                filteredReceipts.Add(new Receipt
                 {
-                    receiptsByAmount.Add(new Receipt
-                    {
-                        ReceiptID = amountReader.GetInt32("receiptID"),
-                        UserID = amountReader.GetInt32("userID"),
-                        Vendor = amountReader.GetString("vendor"),
-                        Amount = amountReader.GetDecimal("amount"),
-                        PurchaseDate = amountReader.GetDateTime("purchaseDate")
-                    });
-                }
+                    ReceiptID = reader.GetInt32("receiptID"),
+                    UserID = reader.GetInt32("userID"),
+                    Vendor = reader.GetString("vendor"),
+                    Amount = reader.GetDecimal("amount"),
+                    PurchaseDate = reader.GetDateTime("purchaseDate")
+                });
             }
-            return receiptsByAmount;
+
+            return filteredReceipts;
         }
     }
 }
