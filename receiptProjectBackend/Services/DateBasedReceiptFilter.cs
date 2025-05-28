@@ -10,7 +10,7 @@ namespace receiptProject.receiptProjectBackend.Services{
         {
             var receiptsByDate = new List<Receipt>();
             
-            string connectionString = "Server=localhost;Database=ReceiptProject;User=root;Password=540770;Port=3306;";
+            string connectionString = "Server=localhost;Database=ReceiptProject;User=root;Password=CPSC40801;Port=3306;";
             
             using (var conn = new MySqlConnection(connectionString))
             {

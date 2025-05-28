@@ -97,7 +97,7 @@ namespace receiptProject.receiptProjectBackend.Services
                     PurchaseDate = ExtractDate(fullText),
                     Amount = ExtractAmount(fullText),
                     Vendor = ExtractVendor(fullText),
-                };
+                };  
 
                 if (receipt.Amount == null && receipt.Vendor == null && receipt.PurchaseDate == null)
                 {
